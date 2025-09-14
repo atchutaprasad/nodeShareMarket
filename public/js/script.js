@@ -1,7 +1,11 @@
+
 var ajaxPOSTCall = (api, postData, callback) => {
     let xhr = new XMLHttpRequest();
     xhr.open('POST', api, true);
     xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+    if (localStorage.getItem('auth')) {
+        xhr.setRequestHeader('Authorization', `Bearer ${getAuthenticator()}`);
+    }
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {
             let data = JSON.parse(xhr.responseText);
@@ -9,7 +13,7 @@ var ajaxPOSTCall = (api, postData, callback) => {
             callback(data);
         } else if (xhr.readyState === 4 && xhr.status !== 200) {
             alert('Ajax POST call failed');
-            console.error('AJAX call failed! Status:', xhr.status);
+            console.error('AJAX POST call failed! Status:', xhr.status);
         }
     };
     xhr.send(JSON.stringify(postData));
@@ -19,53 +23,34 @@ var ajaxGETCall = (api, callback) => {
     let xhr = new XMLHttpRequest();
     xhr.open('GET', api, true);
     xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+    if (localStorage.getItem('auth')) {
+        xhr.setRequestHeader('Authorization', `Bearer ${getAuthenticator()}`);
+    }
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {
             let data = JSON.parse(xhr.responseText);
             console.log(data);
             callback(data);
         } else if (xhr.readyState === 4 && xhr.status !== 200) {
-            alert('Ajax Get call failed');
-            console.error('AJAX call failed! Status:', xhr.status);
+            alert('Ajax GET call failed');
+            console.error('AJAX GET call failed! Status:', xhr.status);
         }
     };
     xhr.send();
     return false;
 }
 
-var loginAngleOneSession = () => {
-     ajaxGETCall('/api/loginAngleOne?totp='+$('#totp').val(), angleOneLoginSessionCallback);
+var includeJS = (src, cb) => {
+    var script = document.createElement("SCRIPT");
+    script.src = src;
+    script.async = true;
+    script.type = 'text/javascript';
+    script.onload = function () {
+        if (cb) cb()
+    }
+    document.getElementsByTagName("head")[0].appendChild(script);
 }
 
-var logOutAngleOneSession = () => {
-    ajaxGETCall('/api/loginAngleOne?totp='+$('#totp').val(), angleOneLogOutSessionCallback);
-}
+includeJS("/js/login.js");
+includeJS("/js/session.js");
 
-var angleOneLoginSessionCallback = (response) => {
-    $('#angleOneCode').show();
-    $('#generateSession').hide();
-}
-
-var angleOneLogOutSessionCallback = (response) => {
-    $('#angleOneCode').hide();
-    $('#generateSession').show();
-}
-
-var selectedStokeSubmit = () => {
-    document.querySelector('#stokeSelected').addEventListener('submit', function (event) {
-        event.preventDefault();
-        ajaxPOSTCall('/api/stokeSelected', { selectedStoke: this.elements.stockSelected.value }, selectedStokeSubmitCallback);
-    });
-}
-
-var generateAngleOneSession = () => {
-    ajaxGETCall('/api/generateSession', angleOneLoginSessionCallback);
-}
-
-var selectedStokeSubmitCallback = (response) => {
-    document.getElementById('result').innerHTML = `Title: ${response.message}`;
-}
-
-window.addEventListener('load', function () {
-    selectedStokeSubmit();
-});
