@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="/css/styles.css"></link>
+  <script src="/js/jquery-3.7.1.min.js" type="text/javascript"></script>
+  <script src="/js/script.js" type="text/javascript"></script>
+</head>
+<body>
+  <div id="mainContainer" style="width:1000px;margin: 0 auto;">
+
+
+    <div id="header">Header</div>
+    <div id="mainBody">
+      <div id="generateSession"><input type="text" id="totp"/><a href="javascript:void(0)" onclick="loginAngleOneSession()">Angle One - Login</a></div>
+      <div id="angleOneCode">
+        <div style="float: right;"><a href="javascript:void(0)" onclick="logOutAngleOneSession()" >Logout</a></div>
+        <h1>Fetch the Data Related to Any Stock</h1>
+
+
+        <!--<img src="/images/1.jpg"/> action="/api/stokeSelected" method="post"-->
+        <br>
+        <h2>Select the Stock--- </h2>
+        <form id="stokeSelected">
+          <select class="" name="stockSelected" method="post">
+            <option value="RELIANCE">RELIANCE</option>
+            <option value="INFY">INFOSYS</option>
+            <option value="TCS">TCS</option>
+            <option value="WIPRO">WIPRO</option>
+            <option value="ICICIBANK">ICICI Bank</option>
+            <option value="ITC">ITC</option>
+          </select>
+          <button type="submit" name="button">
+            Fetch Data
+          </button>
+        </form>
+        <div id="result"></div>
+      </div>
+
+    </div>
+    <div id="footer">footer</div>
+
+  </div>
+
+</body>
+
+</html>
