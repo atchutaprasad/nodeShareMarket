@@ -1,3 +1,5 @@
+ @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css");
+
  body {
    margin: 0px;
    padding: 0px;
@@ -15,7 +17,7 @@
    padding-top: 40px;
    height: 100px;
    vertical-align: middle;
-   text-align: center;
+   text-align: left;
 
  }
 
@@ -36,7 +38,6 @@
 
  #generateSession {
    display: block;
-   margin-left: 25%;
  }
 
  #angleOneCode {

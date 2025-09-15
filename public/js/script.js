@@ -10,7 +10,14 @@ var ajaxPOSTCall = (api, postData, callback) => {
         if (xhr.readyState === 4 && xhr.status === 200) {
             let data = JSON.parse(xhr.responseText);
             console.log(data);
-            callback(data);
+            if (data.message === "Invalid Token") {
+                localStorage.clear();
+                $('#angleOneCode').hide();
+                $('#generateSession').show();
+                alert('In valid token, Please login to start');
+            } else {
+                callback(data);
+            }
         } else if (xhr.readyState === 4 && xhr.status !== 200) {
             alert('Ajax POST call failed');
             console.error('AJAX POST call failed! Status:', xhr.status);
@@ -30,7 +37,14 @@ var ajaxGETCall = (api, callback) => {
         if (xhr.readyState === 4 && xhr.status === 200) {
             let data = JSON.parse(xhr.responseText);
             console.log(data);
-            callback(data);
+            if (data.message === "Invalid Token") {
+                localStorage.clear();
+                $('#angleOneCode').hide();
+                $('#generateSession').show();
+                alert('In valid token, Please login to start');
+            } else {
+                callback(data);
+            }
         } else if (xhr.readyState === 4 && xhr.status !== 200) {
             alert('Ajax GET call failed');
             console.error('AJAX GET call failed! Status:', xhr.status);
@@ -49,6 +63,11 @@ var includeJS = (src, cb) => {
         if (cb) cb()
     }
     document.getElementsByTagName("head")[0].appendChild(script);
+}
+
+
+var hideUnwantedTags = () => {
+    $('.hideUnwantedTag').hide();
 }
 
 includeJS("/js/login.js");

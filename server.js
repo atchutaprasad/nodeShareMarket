@@ -38,6 +38,20 @@ app.get('/api/generateToken', async (req, res) => {
    }).catch((error) => { res.json(error); });
 });
 
+app.get('/api/profileDetails', async (req, res) => {
+   const authorization = req.headers['authorization'];
+   console.log(authorization)
+   let config = angleOneJS.profileDetailsParams(authorization);
+   await axios(config).then((response) => { res.json(response.data); }).catch((error) => { res.json(error); });
+});
+
+app.get('/api/rmsDetails', async (req, res) => {
+   const authorization = req.headers['authorization'];
+   console.log(authorization)
+   let config = angleOneJS.rmsDetailsParams(authorization);
+   await axios(config).then((response) => { res.json(response.data); }).catch((error) => { res.json(error); });
+});
+
 app.get('/api/logOut', async (req, res) => {
    const authorization = req.headers['authorization'];
    console.log(authorization)

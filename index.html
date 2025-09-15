@@ -35,7 +35,7 @@
               <input type="text" class="form-control" id="totp" placeholder="totp">
             </div>
             <div class="col">
-              <button type="button" onclick="loginAngleOneSession()" class="btn btn-info mb-3">Login</button>
+              <button type="button" onclick="loginAngleOneSession()" class="btn btn-info">Login</button>
             </div>
             <div class="col-3"></div>
           </form>
@@ -45,7 +45,18 @@
           <div class="row">
             <div class="col">
               <!--<img src="/images/1.jpg"/> <div style="float: right;"><a href="javascript:void(0)" onclick="generateSession()" >Generate Token</a></div>-->
-              <div style="float: right;"><a href="javascript:void(0)" onclick="logOutAngleOneSession()">Logout</a></div>
+
+              <div style="float: right;">
+                <button type="button" class="btn" onclick="generateSession()" title="Re-generate Token"
+                  alt="Re-generate Token"> <i class="bi bi-brush"></i> </button>
+
+                <button type="button" class="btn" onclick="logOutAngleOneSession()" title="Logout" alt="Logout"> <i
+                    class="bi bi-sign-stop"> </i></button>
+                <button type="button" class="btn" onclick="hideUnwantedTags()" title="Hide Unwanted Tags"
+                  alt="Hide Unwanted Tags"> <i class="bi bi-basket"></i></button>
+
+
+              </div>
             </div>
           </div>
           <div class="row">
@@ -53,12 +64,37 @@
               <h1>Angle One</h1>
             </div>
           </div>
+          <div class="row hideUnwantedTag">
+            <div class="col-3">
+              <button type="button" class="btn" onclick="profileDetails()" title="Profile Details"
+                alt="Profile Details"> <i class="bi bi-rocket-takeoff"></i> Profile Details </button>
+            </div>
+            <div class="col" id="profiledetails"></div>
+          </div>
 
+          <div class="row hideUnwantedTag">
+            <div class="col">&nbsp;</div>
+          </div>
+
+          <div class="row hideUnwantedTag">
+            <div class="col-3">
+              <button type="button" class="btn" onclick="rmsDetails()" title="RMS Details"
+                alt="RMS Details"> <i class="bi bi-box-arrow-down-right"></i> RMS Details </button>
+            </div>
+            <div class="col" id="rmsdetails"></div>
+          </div>
+
+          <div class="row hideUnwantedTag">
+            <div class="col">&nbsp;</div>
+          </div>
+          <div class="row hideUnwantedTag">
+            <div class="col">&nbsp;</div>
+          </div>
 
 
           <div class="row">
             <div class="col">
-              <h4>Select the Stock </h4>
+              <p>Select the Stock </p>
             </div>
             <div class="col">
               <select class="form-control" id="stokeSelected" name="stockSelected">

@@ -26,7 +26,7 @@ var loginParams = (totp) => {
 
 var generateToken = (authorization, REFRESH_TOKEN) => {
     var data = JSON.stringify({
-         "refreshToken": REFRESH_TOKEN
+        "refreshToken": REFRESH_TOKEN
     });
     var config = {
         method: 'post',
@@ -47,8 +47,46 @@ var generateToken = (authorization, REFRESH_TOKEN) => {
     return config;
 }
 
+var profileDetailsParams = (authorization) => {
+    var config = {
+        method: 'get',
+        url: 'https://apiconnect.angelone.in/rest/secure/angelbroking/user/v1/getProfile',
+        headers: {
+            'Authorization': authorization,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-UserType': 'USER',
+            'X-SourceID': 'WEB',
+            'X-ClientLocalIP': '192.168.0.108',
+            'X-ClientPublicIP': '192.168.0.1',
+            'X-MACAddress': 'E4-B9-7A-08-0D-2B',
+            'X-PrivateKey': 'jkFNrQQQ'
+        }
+    };
+    return config;
+}
+
+var rmsDetailsParams = (authorization) => {
+    var config = {
+        method: 'get',
+        url: 'https://apiconnect.angelone.in/rest/secure/angelbroking/user/v1/getRMS',
+        headers: {
+            'Authorization': authorization,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-UserType': 'USER',
+            'X-SourceID': 'WEB',
+            'X-ClientLocalIP': '192.168.0.108',
+            'X-ClientPublicIP': '192.168.0.1',
+            'X-MACAddress': 'E4-B9-7A-08-0D-2B',
+            'X-PrivateKey': 'jkFNrQQQ'
+        }
+    };
+    return config;
+}
+
 var logOutParams = (authorization) => {
-    var data = {clientcode: "V112910"}
+    var data = { clientcode: "V112910" }
     var config = {
         method: 'post',
         url: 'https://apiconnect.angelone.in/rest/secure/angelbroking/user/v1/logout',
@@ -70,7 +108,7 @@ var logOutParams = (authorization) => {
 
 
 
-module.exports = { loginParams, generateToken, logOutParams };
+module.exports = { loginParams, generateToken, profileDetailsParams, rmsDetailsParams, logOutParams };
 
 /*
 

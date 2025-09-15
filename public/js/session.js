@@ -19,7 +19,31 @@ var selectedStokeSubmit = () => {
     ajaxPOSTCall('/api/stokeSelected', { selectedStoke: $('#stokeSelected').val() }, selectedStokeSubmitCallback);
 }
 
+var profileDetails = () => {
+    ajaxGETCall('/api/profileDetails', profileDetailsCallback);
+}
 
+var profileDetailsCallback = (res) => {
+    var html = '<div>'
+    $.each(res.data, function (key, value) {
+        html += '<div><label style="width:200px">' + key + '</label>: ' + value + '</div>';
+    });
+    html += '<div>'
+    document.getElementById("profiledetails").innerHTML = html;
+}
+
+var rmsDetails = () => {
+    ajaxGETCall('/api/rmsDetails', rmsDetailsCallback);
+}
+
+var rmsDetailsCallback = (res) => {
+    var html = '<div>'
+    $.each(res.data, function (key, value) {
+        html += '<div><label style="width:200px">' + key + '</label>: ' + value + '</div>';
+    });
+    html += '<div>'
+    document.getElementById("rmsdetails").innerHTML = html;
+}
 
 
 var selectedStokeSubmitCallback = (response) => {
