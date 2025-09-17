@@ -1,4 +1,10 @@
-
+var constants = {
+    profileDetailsLoaded :false,
+    rawStokeDetailsLoaded :false,
+    rmsDetailsLoaded :false,
+    intradayDetailsLoaded :false,
+    intradayStokesLoaded: false
+}
 var ajaxPOSTCall = (api, postData, callback) => {
     let xhr = new XMLHttpRequest();
     xhr.open('POST', api, true);
@@ -67,7 +73,16 @@ var includeJS = (src, cb) => {
 
 
 var hideUnwantedTags = () => {
-    $('.hideUnwantedTag').hide();
+    if ($('.hideUnwantedTag').is(":visible")) {
+        $('.hideUnwantedTag').hide();
+    } else {
+        $('.hideUnwantedTag').show();
+    }
+}
+
+var enableTabs = (event) => {
+    $('.tabsHide').hide();
+    $('#'+ $(event.target).attr("data-tag")).show();
 }
 
 includeJS("/js/login.js");

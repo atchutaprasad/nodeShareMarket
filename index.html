@@ -65,31 +65,85 @@
             </div>
           </div>
           <div class="row hideUnwantedTag">
-            <div class="col-3">
-              <button type="button" class="btn" onclick="profileDetails()" title="Profile Details"
-                alt="Profile Details"> <i class="bi bi-rocket-takeoff"></i> Profile Details </button>
+            <div class="col">
+              <button type="button" class="btn" onclick="profileDetails(event)" data-tag="profiledetails"
+                title="Profile Details" alt="Profile Details"> <i class="bi bi-rocket-takeoff"></i> Profile Details
+              </button>
             </div>
-            <div class="col" id="profiledetails"></div>
-          </div>
-
-          <div class="row hideUnwantedTag">
-            <div class="col">&nbsp;</div>
-          </div>
-
-          <div class="row hideUnwantedTag">
-            <div class="col-3">
-              <button type="button" class="btn" onclick="rmsDetails()" title="RMS Details"
+            <div class="col">
+              <button type="button" class="btn" onclick="rmsDetails(event)" data-tag="rmsdetails" title="RMS Details"
                 alt="RMS Details"> <i class="bi bi-box-arrow-down-right"></i> RMS Details </button>
             </div>
-            <div class="col" id="rmsdetails"></div>
+            <div class="col">
+              <button type="button" class="btn" onclick="loadRawStokes(event)" data-tag="loadRawStokes"
+                title="Raw Stokes" alt="Raw Stokes"> <i class="bi bi-box-arrow-in-down"></i> Load Raw Stoke Details
+              </button>
+            </div>
+
+            <div class="col">
+              <button type="button" class="btn" onclick="intradayStokes(event)" data-tag="intradayStokes"
+                title="intraday Stokes" alt="intraday Stokes"> <i class="bi bi-box-arrow-in-down"></i> Intraday Stoke Details
+              </button>
+            </div>
+
           </div>
 
           <div class="row hideUnwantedTag">
             <div class="col">&nbsp;</div>
           </div>
+
+          <div class="row hideUnwantedTag">
+            <div class="col tabsHide" id="profiledetails"></div>
+            <div class="col tabsHide" id="rmsdetails"></div>
+            <div class="col tabsHide" id="loadRawStokes">
+              <div class="table-responsive">
+                <table class="table table-striped table-hover table-bordered">
+                  <thead>
+                    <tr>
+                      <th scope="col">#</th>
+                      <th scope="col">token</th>
+                      <th scope="col">symbol</th>
+                      <th scope="col">name</th>
+                      <th scope="col">instrumenttype</th>
+                      <th scope="col">tick_size</th>
+                      <th scope="col">lotsize</th>
+                      <th scope="col">strike</th>
+                    </tr>
+                  </thead>
+                  <tbody id="loadRawStokesData">
+                    
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="col tabsHide" id="intradayStokes">
+              <div class="table-responsive">
+                <table class="table table-striped table-hover table-bordered">
+                  <thead>
+                    <tr>
+                      <th scope="col">#</th>
+                      <th scope="col">Exchange</th>
+                      <th scope="col">symbol</th>
+                      <th scope="col">Multiplier</th>
+                      <th scope="col">instrumenttype</th>
+                      <th scope="col">tick_size</th>
+                      <th scope="col">lotsize</th>
+                      <th scope="col">strike</th>
+                    </tr>
+                  </thead>
+                  <tbody id="intradayStokesData">
+                    
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
           <div class="row hideUnwantedTag">
             <div class="col">&nbsp;</div>
           </div>
+
+
 
 
           <div class="row">

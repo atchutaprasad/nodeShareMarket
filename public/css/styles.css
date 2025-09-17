@@ -40,6 +40,11 @@
    display: block;
  }
 
- #angleOneCode {
+ #angleOneCode,.tabsHide {
    display: none;
+ }
+
+ #loadRawStokes {
+  height:500px;
+  overflow: auto;
  }
