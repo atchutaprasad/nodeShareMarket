@@ -1,6 +1,7 @@
 // Add express in our project
 var express = require('express');
-
+const mongoose = require('mongoose');
+const Intraday = require('./jsBE/scema/intradayStoke.model')
 // Creating the express app
 var app = express();
 const path = require('path'); // Required for absolute paths
@@ -15,13 +16,15 @@ app.use(function (req, res, next) {
       console.log('Request has timed out.');
       res.send(408);
    });
-
    next();
 });
+
 let { SmartAPI, WebSocket, WebSocketV2 } = require('smartapi-javascript');
 var axios = require("axios");
 const nodeJS = require('./jsBE/node');
 const angleOneJS = require('./jsBE/angleOne');
+//const { default: mongoose } = require('mongoose');
+
 
 
 app.get("/", function (req, res) {
@@ -82,7 +85,7 @@ app.get('/api/loadRawStokes', async (req, res) => {
       const noNumber = /^[^0-9]*$/;
       const noEQ = /EQ/
       for (let i = 0, len = arr.length; i < len; i++) {
-         if (arr[i].exch_seg === 'NSE' && arr[i].expiry === '' && noNumber.test(arr[i].name) &&  noEQ.test(arr[i].symbol)) {
+         if (arr[i].exch_seg === 'NSE' && arr[i].expiry === '' && noNumber.test(arr[i].name) && noEQ.test(arr[i].symbol)) {
             x.push(arr[i])
          }
       }
@@ -98,13 +101,54 @@ app.get('/api/intradayStokes', async (req, res) => {
 });
 
 app.get('/api/logOut', async (req, res) => {
+   await mongoose.disconnect();
    const authorization = req.headers['authorization'];
    let config = angleOneJS.logOutParams(authorization);
    await axios(config).then((response) => { res.json(response.data); }).catch((error) => { res.json(error); });
 });
 
+app.delete('/api/insertIntradayList', async (req, res) => {
+   try {
+      //delete All
+      //const result = await Intraday.deleteMany({});
+      //console.log(`${result.deletedCount} documents deleted.`);
+      //res.status(200).json({})
 
-var port = 3000;
-app.listen(port, function () {
-   console.log(__dirname + '  -  ' +  new Date());
+      //Insert One Record
+      //const iStoke = await Intraday.create(req.body);
+      //res.status(200).json(iStoke)
+
+
+      //find one Record - method GET
+      // const iStoke = await Intraday.findById('68cd8d5a6cbd710c82caece4');
+      // res.status(200).json(iStoke)
+
+      //update one Record - method PUT
+      // const iStoke = await Intraday.findByIdAndUpdate('68cd8d5a6cbd710c82caece4', req.body);
+      // if(!iStoke){
+      //    return res.status(404).json({message: "stoke not found"})
+      // }
+      // const updatedIstoke = await Intraday.findById('68cd8d5a6cbd710c82caece4')
+      // res.status(200).json(updatedIstoke)
+
+
+      //delete one Record - method delete
+      //    const iStoke = await Intraday.findByIdAndDelete('68cd8d5a6cbd710c82caece4', req.body);
+      //    if(!iStoke){
+      //       return res.status(404).json({message: "stoke not found"})
+      //    }
+      //   res.status(200).json({message: "stoke deleted succesfully"})
+
+   } catch (error) {
+      res.status(500).json({ message: error.message })
+   }
+});
+
+mongoose.connect("mongodb+srv://atchutaprasad_db_user:google2020@backendnodestokemarketd.crqxvr0.mongodb.net/stokes-API?retryWrites=true&w=majority&appName=BackEndNodeStokeMarketDB").then(() => {
+   var port = 3000;
+   app.listen(port, function () {
+      console.log(__dirname + '  -  ' + new Date());
+   })
+}).catch((e) => {
+   console.log(e)
 })

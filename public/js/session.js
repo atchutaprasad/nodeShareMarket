@@ -97,7 +97,7 @@ var intradayStokesCallback = (res) => {
     $.each(res.data, function (index, obj) {
         html += `<tr><td>${index}</td><td>${obj.Exchange}</td><td>${obj.SymbolName}</td><td>${obj.Multiplier}</td><td>${obj.token}</td><td>${obj.instrumenttype}</td><td>${obj.lotsize}</td><td>${obj.strike}</td></tr>`;
     });
-    html += ''
+    html += '';
     document.getElementById("intradayStokesData").innerHTML = html;
 }
 /* Load Raw stokes ends */
