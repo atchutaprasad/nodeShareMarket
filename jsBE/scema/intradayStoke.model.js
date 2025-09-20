@@ -2,29 +2,29 @@ const mongoose = require('mongoose');
 
 const IntradaySchema = mongoose.Schema(
     {
-        exchange:{
+        exchange: {
             type: String,
             require: [true, 'exchange name is required']
         },
-        Symbolname:{
+        Symbolname: {
             type: String,
             require: [true, 'exchange name is required']
         },
-        multiplier:{
+        multiplier: {
             type: String,
             require: [true, 'exchange name is required']
         },
-        multiplierTwo:{
+        multiplierTwo: {
             type: String,
             require: [true, 'exchange name is required']
         },
-        token:{
+        token: {
             type: String,
             require: false
         }
     },
     {
-        timestamps : true
+        timestamps: true
     }
 );
 
