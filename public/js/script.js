@@ -6,6 +6,7 @@ var constants = {
     intradayStokesLoaded: false
 }
 var ajaxPOSTCall = (api, postData, callback) => {
+    $('.preloader-overlay').show();
     let xhr = new XMLHttpRequest();
     xhr.open('POST', api, true);
     xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
@@ -28,11 +29,13 @@ var ajaxPOSTCall = (api, postData, callback) => {
             alert('Ajax POST call failed');
             console.error('AJAX POST call failed! Status:', xhr.status);
         }
+        $('.preloader-overlay').hide();
     };
     xhr.send(JSON.stringify(postData));
     return false;
 }
 var ajaxGETCall = (api, callback) => {
+    $('.preloader-overlay').show();
     let xhr = new XMLHttpRequest();
     xhr.open('GET', api, true);
     xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
@@ -55,6 +58,7 @@ var ajaxGETCall = (api, callback) => {
             alert('Ajax GET call failed');
             console.error('AJAX GET call failed! Status:', xhr.status);
         }
+        $('.preloader-overlay').hide();
     };
     xhr.send();
     return false;

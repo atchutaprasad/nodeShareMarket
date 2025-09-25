@@ -68,3 +68,13 @@ app.delete('/api/insertIntradayList', async (req, res) => {
 //     console.timeEnd('for loop');
 //    res.json({"x": x})
 // });
+
+const cron = require('node-cron');
+
+    // Schedule a task to run every 5 minutes
+    cron.schedule('*/5 * * * *', () => {
+      // Your code to be executed every 5 minutes goes here
+      console.log("Executing task every 5 minutes using node-cron.");
+      // Example: generateReport();
+      // Example: cleanUpTemporaryFiles();
+    });
