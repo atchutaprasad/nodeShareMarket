@@ -31,7 +31,7 @@ app.get("/", function (req, res) {
    res.sendFile(__dirname + "/index.html");
 })
 
-mongoose.connect("mongodb+srv://atchutaprasad_db_user:google2020@backendnodestokemarketd.crqxvr0.mongodb.net/stokes-API?retryWrites=true&w=majority&appName=BackEndNodeStokeMarketDB").then(() => {
+mongoose.connect("mongodb://admin:admin@localhost:27017/testDB").then(() => {
    var port = 3000;
    var server = app.listen(port, function () {
       console.log(__dirname + '  -  ' + new Date());

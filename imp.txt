@@ -1,0 +1,82 @@
+Prasads-MacBook-Air:~ prasadatchuta$ ssh-keygen -t ed25519 -C atchutaprasad@gmail.com
+Generating public/private ed25519 key pair.
+Enter file in which to save the key (/Users/prasadatchuta/.ssh/id_ed25519)/users/prasadatchuta/Desktop/hostinger/sshkey
+Enter passphrase (empty for no passphrase): 
+Enter same passphrase again: 
+Your identification has been saved in /users/prasadatchuta/Desktop/hostinger/sshkey
+Your public key has been saved in /users/prasadatchuta/Desktop/hostinger/sshkey.pub
+The key fingerprint is:
+SHA256:94JnZGLprRb9oKrdrE5uYSWX2h6BJe027fiCsNnLPSQ atchutaprasad@gmail.com
+The key's randomart image is:
++--[ED25519 256]--+
+|       .         |
+|      . o        |
+|       = o       |
+|      o O..      |
+|       BS*+      |
+|    . Eo*B+.     |
+|     *.*o==o.    |
+|    o=++*+...    |
+|    .+O==o       |
++----[SHA256]-----+
+
+
+Root Password : Google@202022
+ssh root@72.61.235.233
+root@srv1179126:~/stokeDec2025#
+ssh root@72.61.235.233
+mongo DB:
+
+mongosh / mongodb://&lt;username&gt;:&lt;password&gt;@72.61.235.233:27017/&lt;database&gt;
+mongodb://yourUsername:yourPassword@localhost:27017/
+show dbs
+use DBNAME
+
+
+db.createUser({user:"admin",pwd:"admin",roles:[{roles:[role:"readWrite",db:"testDB"]}]}
+db.createUser({ user: "admin", pwd: "admin",roles: [ { role: "readWrite", db: "testDB" } ]})
+
+
+mongodb://admin:admin@localhost:27017/testDB
+
+
+Start the app:
+npm install -g pm2
+cd /var/www/stokeDec2025
+pm2 start server.js
+pm2 startup
+pm2 save
+
+pm2 restart server.js
+
+pm2 restart &lt;process-name&gt;
+sudo mv /root/stokeDec2025/* /var/www/stokeDec2025/
+
+
+
+
+
+Welcome to Ubuntu 22.04.5 LTS (GNU/Linux 5.15.0-161-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+ System information as of Fri Dec  5 12:56:06 UTC 2025
+
+  System load:  0.08              Processes:             353
+  Usage of /:   7.4% of 48.27GB   Users logged in:       0
+  Memory usage: 10%               IPv4 address for eth0: 72.61.235.233
+  Swap usage:   0%                IPv6 address for eth0: 2a02:4780:12:67d1::1
+
+Expanded Security Maintenance for Applications is not enabled.
+
+
+
+
+https://www.hostinger.com/support/8805712-how-to-use-the-mean-stack-vps-template-at-hostinger/
+https://www.hostinger.com/support/1583227-how-to-point-a-domain-to-your-vps-at-hostinger/
+https://www.hostinger.com/tutorials/migrate-website-from-shared-hosting-to-vps
+https://hpanel.hostinger.com/purchase-new-vps/setting-up
+https://hpanel.hostinger.com/vps/1179126/overview
+https://hpanel.hostinger.com/domains
