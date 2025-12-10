@@ -6,9 +6,10 @@ const parameters = require('../parameters.js');
 let RawStokes = require('../scema/rawStoke.model');
 let Intraday = require('../scema/intradayStoke.model');
 let AutoLogin = require('../scema/loginDetails.model');
+let UtilitySchema = require('../scema/utility.model');
 let loginLogoutController = require('./loginLogout.controller');
 //const WSOrderUpdates = require('smartapi-javascript/src/websocket-order-updates');
-
+let intervalStopper;
 
 
 const rawStokesFilter = (arr) => {
@@ -143,12 +144,12 @@ const rotateLTPRequests = async (config) => {
     await axios(config).then(async (response) => {
         try {
             const ltpData = response.data.data.fetched;
-            console.log('LTP Data:', ltpData.length);
-            console.log('LTP Data:', ltpData[0]);
+            //console.log('LTP Data:', ltpData.length);
+            // console.log('LTP Data:', ltpData[0]);
             ltpData.forEach(async (ltpItem) => {
                 await Intraday.findOneAndUpdate(
                     { token: ltpItem.symbolToken },
-                    { $set: {  percentChange: ltpItem.percentChange }, $push: { ltp: ltpItem.ltp, open: ltpItem.open } },
+                    { $set: { percentChange: ltpItem.percentChange }, $push: { ltp: ltpItem.ltp, open: ltpItem.open } },
                     { new: true, runValidators: false }
                 );
             });
@@ -178,24 +179,51 @@ const fullyAutomateLoadStokesInterval = async () => {
         resultArray[chunkIndex].push(item)
         return resultArray
     }, [])
-    console.log('Total Tokens:', result.length);
+    //console.log('Total Tokens:', result.length);
     result.forEach(async (item, index) => {
         let data = { "mode": "FULL", "exchangeTokens": { "NSE": item } }
         let config = parameters.intradayQuoatesParams(authorization, data);
         setTimeout(async () => { await rotateLTPRequests(config); }, index * 100);
     });
+
 }
 
 const fullyAutomateLTP = async (req, res) => {
     try {
         await fullyAutomateLoadStokesInterval();
-        setInterval(async () => { await fullyAutomateLoadStokesInterval(); }, 15000);
+        await UtilitySchema.deleteMany({});
+        const utilityltp =  new UtilitySchema({ ltpStatus: true });
+        await utilityltp.save();
+        intervalStopper = setInterval(async () => {
+            let utilitySchemaDetailsObj = await UtilitySchema.find({});
+            //console.log(utilitySchemaDetailsObj);
+            if (utilitySchemaDetailsObj[0].ltpStatus == true) {
+                await fullyAutomateLoadStokesInterval();
+                console.log('interval running')
+            }else {
+                clearInterval(intervalStopper);
+                console.log('interval cleared')
+            }
+        }, 15000);
         //await webSocketManyV2();
         res.json({ message: "LTP data fetched successfully" });
     } catch (error) {
         res.json(error.message);
     }
 }
+
+const stopFullyAutomateLTP = async (req, res) => {
+    try {
+        await UtilitySchema.deleteMany({});
+        const utilityltp =  new UtilitySchema({ ltpStatus: false });
+       await utilityltp.save();
+        res.json({ message: "stop  ----  LTP data fetched successfully" });
+    } catch (error) {
+        res.json(error.message);
+    }
+}
+
+
 
 
 const webSocketManyV2 = async () => {
@@ -206,7 +234,7 @@ const webSocketManyV2 = async () => {
         apikey: 'jkFNrQQQ',
         feedtype: loginDetailsObj[0].session.data.feedToken,
     });
-   // web_socket.
+    // web_socket.
     //web_socket.close();
     web_socket.connect().then(async (res) => {
         console.log('WebSocket connected:', res);
@@ -244,5 +272,5 @@ const webSocketManyOrderUpdates = async () => {
 
 
 module.exports = {
-    insertRawStokes, insertIntradayStokes, fetchIntradayStokes, rawStokesFilter, fullyAutomateFetchIntradayStokes, fullyAutomateLoadStokes, fullyAutomateLTP
+    insertRawStokes, insertIntradayStokes, fetchIntradayStokes, rawStokesFilter, fullyAutomateFetchIntradayStokes, fullyAutomateLoadStokes, fullyAutomateLTP, stopFullyAutomateLTP
 };

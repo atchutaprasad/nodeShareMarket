@@ -21,38 +21,36 @@ The key's randomart image is:
 +----[SHA256]-----+
 
 
-Root Password : Google@202022
-ssh root@72.61.235.233
-root@srv1179126:~/stokeDec2025#
-ssh root@72.61.235.233
-mongo DB:
 
-mongosh / mongodb://&lt;username&gt;:&lt;password&gt;@72.61.235.233:27017/&lt;database&gt;
-mongodb://admin:admin@localhost:27017/testDB
-mongodb://admin:admin@72.61.235.233:27017/testDB
-mongodb://admin:admin@72.61.235.233:27017/testDB
-show dbs
-use DBNAME
+after setup SSH at local:
+  ssh root@72.61.235.233
+  Root Password : Google@202022
+  cd /var/www/stokeDec2025
+  root@srv1179126:~/stokeDec2025#
 
+FileZilla:
+  sftp://72.61.235.233 / root / Google@202022 / 22
 
-db.createUser({user:"admin",pwd:"admin",roles:[{roles:[role:"readWrite",db:"testDB"]}]}
-db.createUser({ user: "admin", pwd: "admin",roles: [ { role: "readWrite", db: "testDB" } ]})
-
-
-mongodb://admin:admin@localhost:27017/testDB
-
+mongo DB client ( compass ) and mongo DB run in cmd mode:
+  mongosh
+  show dbs
+  use DBNAME
+  db.createUser({ user: "admin", pwd: "admin",roles: [ { role: "readWrite", db: "testDB" } ]})
+  mongodb://admin:admin@localhost:27017/testDB
+  mongodb://admin:admin@72.61.235.233:27017/testDB
+  mongodb://admin:admin@localhost:27017/testDB
 
 Start the app:
-npm install -g pm2
-cd /var/www/stokeDec2025
-pm2 start server.js
-pm2 startup
-pm2 save
+  npm install -g pm2
+  cd /var/www/stokeDec2025
+  pm2 start server.js
+  pm2 startup
+  pm2 save
 
-pm2 restart server.js
-
-pm2 restart &lt;process-name&gt;
-sudo mv /root/stokeDec2025/* /var/www/stokeDec2025/
+Restart the app :
+  pm2 restart server.js
+  pm2 restart &lt;process-name&gt;
+  sudo mv /root/stokeDec2025/* /var/www/stokeDec2025/
 
 
 
