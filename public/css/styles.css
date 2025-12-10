@@ -18,7 +18,20 @@
    height: 100px;
    vertical-align: middle;
    text-align: left;
-
+ }
+ th{
+  cursor: pointer;
+  background-color: #c2c2c2 !important;
+ }
+ td{
+  word-break: break-all;
+  div{
+    word-break: break-all;
+    height:40px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    width: 200px;
+  }
  }
 
  .footer {
@@ -52,7 +65,9 @@
  .dropdown-menu.show {
     z-index: 100000;
 }
-
+.preloader-container{
+  display: none;
+}
 .preloader-overlay {
   position: fixed; /* Fixes the overlay to the viewport */
   top: 0;

@@ -37,22 +37,51 @@ var fullyAutomateLoadStokes = () => {
 
 var fullyAutomateLoginCallback = (res) => {
     if (res && res.length) {
+        constants.stokesList = res;
         $('#updates').show();
         $('#generateSession').hide();
         localStorage.setItem('setAutoLogin', 'true');
-        $('#updates').show();
         var html = '';
+        let response = res;
+        var percentChange = response.map(item => item.open).join(',').split(',').map(Number)
+        var percentChangeResult = percentChange.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+        var x = 0;
         $.each(res, function (index, obj) {
-            html += `<tr><td>${index}</td><td>${obj.Exchange}</td><td>${obj.name}</td><td>${obj.Multiplier}</td><td>${obj.token}</td><td>${obj.symbol}</td><td>${obj.lotsize}</td><td>${obj.strike}</td></tr>`;
+            x += parseFloat(obj.percentChange);
+            html += `<tr><td>${index}</td><td>${obj.name}</td><td>${obj.open}</td><td><div>${obj.ltp}</div></td><td>${obj.percentChange}</td><td>${x.toFixed(2)}</td></tr>`;
         });
         html += '';
         document.getElementById("fullyAutoMateStokes").innerHTML = html;
+        debugger
+        document.getElementById("percentChangeResult").innerHTML = percentChangeResult + '%';
     } else {
         alert('login failed');
         $('#updates').hide();
         $('#generateSession').show();
         localStorage.setItem('setAutoLogin', 'false');
     }
+}
+
+var sortTable = (column) => {
+    var stokes = []
+    if(column === "name"){
+        if(constants.stokesListIsAscending){
+            constants.stokesListIsAscending = false;
+            stokes = constants.stokesList.sort((a, b) => a.name.localeCompare(b.name));
+        } else {
+            constants.stokesListIsAscending = true;
+            stokes = constants.stokesList.sort((a, b) => b.name.localeCompare(a.name));
+        }
+    } else {
+        if(constants.stokesListIsAscending){
+            constants.stokesListIsAscending = false;
+            stokes = constants.stokesList.sort((a, b) => b[column] - a[column]);
+        } else {
+            constants.stokesListIsAscending = true;
+            stokes = constants.stokesList.sort((a, b) => a[column] - b[column]);
+        }
+    }
+    fullyAutomateLoginCallback(stokes);
 }
 
 var generateSession = () => {

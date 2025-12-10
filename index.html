@@ -203,18 +203,16 @@
           </div>
           <div class="row">
             <div class="col">
+              <div id="percentChangeResult"></div>
               <div class="table-responsive freezeHeight">
                 <table class="table table-striped table-hover table-bordered">
                   <thead class="sticky-top">
                     <tr>
                       <th scope="col">#</th>
-                      <th scope="col">Exchange</th>
-                      <th scope="col">Symbol</th>
-                      <th scope="col">Multiplier</th>
-                      <th scope="col">Token</th>
-                      <th scope="col">Symbol</th>
-                      <th scope="col">LTP</th>
-                      <th scope="col">Strike</th>
+                      <th scope="col" onclick="sortTable('name')">Symbol</th>
+                      <th scope="col" onclick="sortTable('open')">Open</th>
+                      <th scope="col" onclick="sortTable('ltp')">LTP</th>
+                      <th scope="col" onclick="sortTable('percentChange')">Percent Change</th>
                     </tr>
                   </thead>
                   <tbody id="fullyAutoMateStokes">
@@ -243,9 +241,12 @@
 
     </div>
   </div>
-  <div class="preloader-overlay">
-    <div class="spinner"></div> <!-- Or <div class="loading-dots">...</div> -->
+  <div class="preloader-container">
+    <div class="preloader-overlay">
+      <div class="spinner"></div> <!-- Or <div class="loading-dots">...</div> -->
+    </div>
   </div>
+
 </body>
 
 </html>

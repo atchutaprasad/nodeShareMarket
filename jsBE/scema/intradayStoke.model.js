@@ -1,3 +1,4 @@
+const { OrderedBulkOperation } = require('mongodb');
 const mongoose = require('mongoose');
 
 const IntradaySchema = new mongoose.Schema(
@@ -21,12 +22,40 @@ const IntradaySchema = new mongoose.Schema(
         symbol: {
             type: String
         },
+        volume: {
+            type: String
+        },
         ltp:{
             type: Array
+        },
+        ltpTime:{
+            type: Date,
+            default: Date.now
+        },
+        open: {
+           type: Array
+        },
+        high: {
+            type: String
+        },
+        low: {
+            type: String
+        },
+        close: {
+            type: String
+        },
+        percentChange: {
+            type: String
+        },
+        buyPrice: {
+            type: String
+        },
+        sellPrice: {
+            type: String
+        },
+        orderId:{
+            type: String
         }
-    },
-    {
-        timestamps: true
     }
 );
 

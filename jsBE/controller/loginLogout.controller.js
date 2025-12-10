@@ -1,5 +1,6 @@
 var axios = require("axios");
 const mongoose = require('mongoose');
+
 const parameters = require('../parameters.js');
 let Intraday = require('../scema/intradayStoke.model');
 let autoLogin = require('../scema/loginDetails.model');

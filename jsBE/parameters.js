@@ -123,6 +123,26 @@ var intradayStokesParams = (authorization) => {
     return config;
 }
 
+var intradayQuoatesParams = (authorization, data) => {
+    var config = {
+        method: 'post',
+        url: 'https://apiconnect.angelone.in/rest/secure/angelbroking/market/v1/quote/',
+        headers: {
+            'Authorization': authorization,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-UserType': 'USER',
+            'X-SourceID': 'WEB',
+            'X-ClientLocalIP': '192.168.0.108',
+            'X-ClientPublicIP': '192.168.0.1',
+            'X-MACAddress': 'E4-B9-7A-08-0D-2B',
+            'X-PrivateKey': 'jkFNrQQQ'
+        },
+        data: JSON.stringify(data)
+    };
+    return config;
+}
+
 var logOutParams = (authorization) => {
     var data = { clientcode: "V112910" }
     var config = {
@@ -146,7 +166,7 @@ var logOutParams = (authorization) => {
 
 
 
-module.exports = { loginParams, generateToken, profileDetailsParams, rmsDetailsParams, loadRawStokesParams, intradayStokesParams, logOutParams };
+module.exports = { loginParams, generateToken, profileDetailsParams, rmsDetailsParams, loadRawStokesParams, intradayStokesParams, intradayQuoatesParams, logOutParams };
 
 /*
 
