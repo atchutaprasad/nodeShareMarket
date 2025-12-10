@@ -35,6 +35,10 @@ var fullyAutomateLoadStokes = () => {
     ajaxGETCall('/api/intraday/fullyAutomateLoadStokes', fullyAutomateLoginCallback);
 }
 
+var fullyAutomateLTP = () => {
+    ajaxGETCall('/api/intraday/fullyAutomateLTP', (function(){console.log('fully automate LTP')}));
+}
+
 var fullyAutomateLoginCallback = (res) => {
     if (res && res.length) {
         constants.stokesList = res;

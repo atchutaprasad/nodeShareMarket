@@ -28,7 +28,9 @@ ssh root@72.61.235.233
 mongo DB:
 
 mongosh / mongodb://&lt;username&gt;:&lt;password&gt;@72.61.235.233:27017/&lt;database&gt;
-mongodb://yourUsername:yourPassword@localhost:27017/
+mongodb://admin:admin@localhost:27017/testDB
+mongodb://admin:admin@72.61.235.233:27017/testDB
+mongodb://admin:admin@72.61.235.233:27017/testDB
 show dbs
 use DBNAME
 
