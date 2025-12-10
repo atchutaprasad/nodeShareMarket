@@ -48,11 +48,16 @@ var fullyAutomateLoginCallback = (res) => {
         var x = 0;
         $.each(res, function (index, obj) {
             x += parseFloat(obj.percentChange);
-            html += `<tr><td>${index}</td><td>${obj.name}</td><td>${obj.open}</td><td><div>${obj.ltp}</div></td><td>${obj.percentChange}</td><td>${x.toFixed(2)}</td></tr>`;
+            html += `<tr><td>${index}</td>
+                    <td>${obj.name}</td>
+                    <td>${obj.open}</td>
+                    <td><div>${obj.ltp}</div></td>
+                    <td>${obj.percentChange}</td>
+                    </tr>`;
         });
         html += '';
         document.getElementById("fullyAutoMateStokes").innerHTML = html;
-        debugger
+       // debugger
         document.getElementById("percentChangeResult").innerHTML = percentChangeResult + '%';
     } else {
         alert('login failed');
