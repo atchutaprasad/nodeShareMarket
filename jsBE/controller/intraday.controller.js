@@ -145,11 +145,45 @@ const rotateLTPRequests = async (config) => {
         try {
             const ltpData = response.data.data.fetched;
             //console.log('LTP Data:', ltpData.length);
-            // console.log('LTP Data:', ltpData[0]);
+            //console.log('LTP Data:', ltpData[0]);
             ltpData.forEach(async (ltpItem) => {
+                let updateObj = {};
+
+                //wokring version
+
+                // await Intraday.findOneAndUpdate(
+                //     { token: ltpItem.symbolToken,'ltp.slice(-1)': { $ne: ltpItem.ltp } },
+                //     { $set: { percentChange: ltpItem.percentChange }, $push:  { ltp: ltpItem.ltp, open: ltpItem.open, ltpTime: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) }},
+                //     { new: true, runValidators: false }
+                // );
+
+                const stoke = await Intraday.findOne({ token: ltpItem.symbolToken });
+                //console.log(stoke)
+                if (stoke.ltp && stoke.ltp.length > 1 && stoke.ltp.at(-1) !== ltpItem.ltp) {
+                    updateObj.ltp = ltpItem.ltp;
+                    updateObj.ltpTime = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+                }
+                if (stoke.open && stoke.open.length > 1 && stoke.open.at(-1) !== ltpItem.open) {
+                    updateObj.open = ltpItem.open;
+                    updateObj.openTime = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+                }
+
+
+                if (stoke.ltp && stoke.ltp.length < 2) {
+                    updateObj.ltp = ltpItem.ltp;
+                    updateObj.ltpTime = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+                }
+                if (stoke.open && stoke.open.length < 2) {
+                    updateObj.open = ltpItem.open;
+                    updateObj.openTime = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+                }
+                //console.log(updateObj)
+
                 await Intraday.findOneAndUpdate(
                     { token: ltpItem.symbolToken },
-                    { $set: { percentChange: ltpItem.percentChange }, $push: { ltp: ltpItem.ltp, open: ltpItem.open } },
+                    {
+                        $set: { percentChange: ltpItem.percentChange }, $push: updateObj
+                    },
                     { new: true, runValidators: false }
                 );
             });
@@ -192,7 +226,7 @@ const fullyAutomateLTP = async (req, res) => {
     try {
         await fullyAutomateLoadStokesInterval();
         await UtilitySchema.deleteMany({});
-        const utilityltp =  new UtilitySchema({ ltpStatus: true });
+        const utilityltp = new UtilitySchema({ ltpStatus: true });
         await utilityltp.save();
         intervalStopper = setInterval(async () => {
             let utilitySchemaDetailsObj = await UtilitySchema.find({});
@@ -200,7 +234,7 @@ const fullyAutomateLTP = async (req, res) => {
             if (utilitySchemaDetailsObj[0].ltpStatus == true) {
                 await fullyAutomateLoadStokesInterval();
                 console.log('interval running')
-            }else {
+            } else {
                 clearInterval(intervalStopper);
                 console.log('interval cleared')
             }
@@ -215,8 +249,8 @@ const fullyAutomateLTP = async (req, res) => {
 const stopFullyAutomateLTP = async (req, res) => {
     try {
         await UtilitySchema.deleteMany({});
-        const utilityltp =  new UtilitySchema({ ltpStatus: false });
-       await utilityltp.save();
+        const utilityltp = new UtilitySchema({ ltpStatus: false });
+        await utilityltp.save();
         res.json({ message: "stop  ----  LTP data fetched successfully" });
     } catch (error) {
         res.json(error.message);

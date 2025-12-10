@@ -25,13 +25,6 @@
  }
  td{
   word-break: break-all;
-  div{
-    word-break: break-all;
-    height:40px;
-    overflow-x: hidden;
-    overflow-y: scroll;
-    width: 200px;
-  }
  }
 
  .footer {

@@ -46,6 +46,8 @@ Start the app:
   pm2 start server.js
   pm2 startup
   pm2 save
+  pm2 logs
+  pm2 flush
 
 Restart the app :
   pm2 restart server.js

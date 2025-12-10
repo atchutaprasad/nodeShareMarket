@@ -29,8 +29,10 @@ const IntradaySchema = new mongoose.Schema(
             type: Array
         },
         ltpTime:{
-            type: Date,
-            default: Date.now
+            type: Array
+        },
+        openTime:{
+            type: Array
         },
         open: {
            type: Array

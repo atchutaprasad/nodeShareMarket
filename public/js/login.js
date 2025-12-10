@@ -36,11 +36,11 @@ var fullyAutomateLoadStokes = () => {
 }
 
 var fullyAutomateLTP = () => {
-    ajaxGETCall('/api/intraday/fullyAutomateLTP', (function(){console.log('fully automate LTP')}));
+    ajaxGETCall('/api/intraday/fullyAutomateLTP', (function () { console.log('fully automate LTP') }));
 }
 
 var stopFullyAutomateLTP = () => {
-    ajaxGETCall('/api/intraday/stopFullyAutomateLTP', (function(){console.log('stop fully automate LTP')}));
+    ajaxGETCall('/api/intraday/stopFullyAutomateLTP', (function () { console.log('stop fully automate LTP') }));
 }
 
 var fullyAutomateLoginCallback = (res) => {
@@ -58,14 +58,14 @@ var fullyAutomateLoginCallback = (res) => {
             x += parseFloat(obj.percentChange);
             html += `<tr><td>${index}</td>
                     <td>${obj.name}</td>
-                    <td>${obj.open}</td>
-                    <td><div>${obj.ltp}</div></td>
+                    <td>${htmlReturn(obj, obj.open, obj.openTime)}</td>
+                    <td><div>${htmlReturn(obj, obj.ltp, obj.ltpTime)}</div></td>
                     <td>${obj.percentChange}</td>
                     </tr>`;
         });
         html += '';
         document.getElementById("fullyAutoMateStokes").innerHTML = html;
-       // debugger
+        // debugger
         document.getElementById("percentChangeResult").innerHTML = percentChangeResult + '%';
     } else {
         alert('login failed');
@@ -75,10 +75,19 @@ var fullyAutomateLoginCallback = (res) => {
     }
 }
 
+var htmlReturn = (obj, arrayElements, timer) => {
+    //let ltpList = obj.split(',')
+    let html = '';
+    $.each(arrayElements, function (index, arrayElement) {
+        html += `${arrayElement} - ${timer[index]} <br/>`;
+    });
+    return html;
+}
+
 var sortTable = (column) => {
     var stokes = []
-    if(column === "name"){
-        if(constants.stokesListIsAscending){
+    if (column === "name") {
+        if (constants.stokesListIsAscending) {
             constants.stokesListIsAscending = false;
             stokes = constants.stokesList.sort((a, b) => a.name.localeCompare(b.name));
         } else {
@@ -86,7 +95,7 @@ var sortTable = (column) => {
             stokes = constants.stokesList.sort((a, b) => b.name.localeCompare(a.name));
         }
     } else {
-        if(constants.stokesListIsAscending){
+        if (constants.stokesListIsAscending) {
             constants.stokesListIsAscending = false;
             stokes = constants.stokesList.sort((a, b) => b[column] - a[column]);
         } else {
