@@ -57,6 +57,9 @@ const IntradaySchema = new mongoose.Schema(
         },
         orderId:{
             type: String
+        },
+        history: {
+            type: Array
         }
     }
 );

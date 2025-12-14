@@ -129,9 +129,9 @@ var checkSession = () => {
             fullyAutomateLoadStokes();
         }
         else {
-           // alert('session expired');
             $('#updates').hide();
             $('#generateSession').show();
+            alert(res.realMessage);
         }
     });
 }
@@ -175,6 +175,25 @@ var onLoadEvents = () => {
     // });
 
 }
+
+restartPM2Server = () => {
+    ajaxGETCall('/api/admin/restartPM2Server', (res) => {
+        alert(res.message);
+    }); 
+}
+
+startPM2Server = () => {
+    ajaxGETCall('/api/admin/startPM2Server', (res) => {
+        alert(res.message);
+    }); 
+}
+
+stopPM2Server = () => {
+    ajaxGETCall('/api/admin/stopPM2Server', (res) => {
+        alert(res.message);
+    }); 
+}
+
 
 window.addEventListener('load', function () {
     onLoadEvents();

@@ -25,7 +25,11 @@ app.use("/api/checker", chekerRoute);
 const intradayRoute = require("./jsBE/router/intraday.route");
 app.use("/api/intraday", intradayRoute);
 
+const adminRoute = require("./jsBE/router/admin.route");
+app.use("/api/admin", adminRoute);
 
+const luckyRoute = require("./jsBE/router/lucky.route");
+app.use("/api/lucky", luckyRoute);
 
 app.get("/", function (req, res) {
    res.sendFile(__dirname + "/index.html");

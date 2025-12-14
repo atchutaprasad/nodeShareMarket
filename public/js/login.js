@@ -43,6 +43,11 @@ var stopFullyAutomateLTP = () => {
     ajaxGETCall('/api/intraday/stopFullyAutomateLTP', (function () { console.log('stop fully automate LTP') }));
 }
 
+
+var lucky = () => {
+    ajaxGETCall('/api/lucky/history', fullyAutomateLoginCallback); 
+}
+
 var fullyAutomateLoginCallback = (res) => {
     if (res && res.length) {
         constants.stokesList = res;
@@ -60,6 +65,7 @@ var fullyAutomateLoginCallback = (res) => {
                     <td>${obj.name}</td>
                     <td>${htmlReturn(obj, obj.open, obj.openTime)}</td>
                     <td><div>${htmlReturn(obj, obj.ltp, obj.ltpTime)}</div></td>
+                    <td>${obj.history}</td>
                     <td>${obj.percentChange}</td>
                     </tr>`;
         });

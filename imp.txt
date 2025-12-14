@@ -58,6 +58,19 @@ Restart the app :
   pm2 restart &lt;process-name&gt;
   sudo mv /root/stokeDec2025/* /var/www/stokeDec2025/
 
+Mongo DB start and stop:
+  sudo systemctl stop mongod
+  sudo truncate -s 0 /var/log/mongodb/mongod.log ( te remove logs)
+  sudo systemctl status mongod
+  sudo systemctl start mongod
+
+File sizes check:
+  sudo find / -type f -size +50M -exec ls -lh {} \; | sort -k 5 -rh | head -20
+
+
+
+
+
 
 
 

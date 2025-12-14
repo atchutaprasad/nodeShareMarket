@@ -20,7 +20,11 @@
 
     <div class="row header">
       <div class="col">
-        Header
+        Header 
+        <!--<button type="button" class="btn" onclick="startPM2Server()" title="startPM2Server" alt="startPM2Server"> <i
+                    class="bi bi-brush"></i> startPM2Server</button><button type="button" class="btn" onclick="restartPM2Server()" title="restartPM2Server" alt="restartPM2Server"> <i
+                    class="bi bi-brush"></i> restartPM2Server</button> - <button type="button" class="btn" onclick="stopPM2Server()" title="stopPM2Server" alt="stopPM2Server"> <i
+                    class="bi bi-brush"></i> stopPM2Server</button>-->
       </div>
     </div>
 
@@ -53,9 +57,11 @@
                 <button type="button" class="btn" onclick="fullyAutomateLogout()" title="Logout" alt="Logout"> <i
                     class="bi bi-sign-stop"> </i></button>
                 <button type="button" class="btn" onclick="fullyAutomateLTP()" title="LTP" alt="LTP"> <i
-                    class="bi bi-check"> </i> LTP </button>
+                    class="bi bi-tag-fill"> </i> Start LTP </button>
                 <button type="button" class="btn" onclick="stopFullyAutomateLTP()" title="Stop LTP" alt="Stop LTP"> <i
-                    class="bi bi-check"> </i> Stop LTP </button>
+                    class="bi bi-tag"> </i> Stop LTP </button>
+                    <button type="button" class="btn" onclick="lucky()" title="Stop LTP" alt="Stop LTP"> <i
+                    class="bi bi-clock-history"> </i> lucky </button>
               </div>
             </div>
           </div>
@@ -73,6 +79,7 @@
                       <th scope="col" onclick="sortTable('name')">Symbol</th>
                       <th scope="col" onclick="sortTable('open')">Open</th>
                       <th scope="col" onclick="sortTable('ltp')">LTP</th>
+                      <th scope="col" onclick="sortTable('history')">History</th>
                       <th scope="col" onclick="sortTable('percentChange')">Percent Change</th>
                     </tr>
                   </thead>

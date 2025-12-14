@@ -131,7 +131,7 @@ const fullyAutomateFetchIntradayStokes = async () => {
     ])
     await Intraday.deleteMany({});
     console.log('results - ' + result.length);
-     //console.log(result);
+    //console.log(result);
     await Intraday.insertMany(result);
     await Intraday.deleteMany({ token: undefined })
     return await Intraday.find({});
@@ -195,9 +195,19 @@ const rotateLTPRequests = async (config) => {
             console.error('Error merging LTP data:', error.message);
         }
     }).catch((error) => {
-        console.log('error:', JSON.stringify(error));
-        console.log('Config:', JSON.stringify(error.config));
-        console.error('Error fetching LTP data:', error.message);
+        if (error.isAxiosError) {
+            // Optionally log a minimal message or skip logging
+            console.error('Axios error occurred ------ ', error.response?.data);
+            return; // Do nothing, suppress log
+        }
+        // Log other errors if needed
+        console.error(error);
+
+        //console.log('response failed data:', JSON.stringify(error.response.data));
+        //console.log('response failed data 2:', config.data);
+        //console.log('error:', JSON.stringify(error));
+        //console.log('Config:', JSON.stringify(error.config));
+        //console.error('Error fetching LTP data:', error.message);
         //res.json(error.message);
     });
 }
@@ -261,5 +271,5 @@ const stopFullyAutomateLTP = async (req, res) => {
 
 
 module.exports = {
-    insertRawStokes, insertIntradayStokes, fetchIntradayStokes, rawStokesFilter, fullyAutomateFetchIntradayStokes, fullyAutomateLoadStokes, fullyAutomateLTP, stopFullyAutomateLTP
+    insertRawStokes, insertIntradayStokes, fetchIntradayStokes, rawStokesFilter, fullyAutomateFetchIntradayStokes, fullyAutomateLoadStokes, fullyAutomateLTP, stopFullyAutomateLTP, fullyAutomateLoadStokesInterval
 };
