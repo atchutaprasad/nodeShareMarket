@@ -103,7 +103,7 @@ const fullyAutomateFetchIntradayStokes = async () => {
     const result = await Intraday.aggregate([
         {
             $lookup: {
-                from: 'rawstokes',
+                from: 'rawstokes',//+(new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })).split(',')[0],
                 localField: 'name',
                 foreignField: 'name',
                 as: 'joinedData'
@@ -130,6 +130,8 @@ const fullyAutomateFetchIntradayStokes = async () => {
         }
     ])
     await Intraday.deleteMany({});
+    console.log('results - ' + result.length);
+     //console.log(result);
     await Intraday.insertMany(result);
     await Intraday.deleteMany({ token: undefined })
     return await Intraday.find({});
@@ -255,53 +257,6 @@ const stopFullyAutomateLTP = async (req, res) => {
     } catch (error) {
         res.json(error.message);
     }
-}
-
-
-
-
-const webSocketManyV2 = async () => {
-    let loginDetailsObj = await AutoLogin.find({});
-    let web_socket = new WebSocketV2({
-        clientcode: "V112910",
-        jwttoken: 'Bearer ' + loginDetailsObj[0].session.data.jwtToken,
-        apikey: 'jkFNrQQQ',
-        feedtype: loginDetailsObj[0].session.data.feedToken,
-    });
-    // web_socket.
-    //web_socket.close();
-    web_socket.connect().then(async (res) => {
-        console.log('WebSocket connected:', res);
-        const intradayRecords = await Intraday.find({});
-        const tokens = intradayRecords.map(item => { if (item.token) { return '---' + item.token; } }).join(',').replace(/---undefined,/g, '').replace(/---/g, '');
-        console.log('Tokens to subscribe:', tokens);
-        // Replace with your desired tokens
-        // Subscribe to tokens
-        let json_req = {
-            action: 1,
-            mode: 1,
-            exchangeType: 1,
-            tokens: tokens //['5449', '910', '14584', '10825'] // Example tokens
-        };
-
-        web_socket.fetchData(json_req);
-        web_socket.on('tick', receiveTick);
-
-        function receiveTick(data) {
-            console.log('receiveTick:::::', data);
-            //web_socket.close(); // Close the connection after receiving data
-        }
-    });
-}
-
-const webSocketManyOrderUpdates = async () => {
-    let loginDetailsObj = await AutoLogin.find({});
-    return new WSOrderUpdates({
-        clientcode: "V112910",
-        jwttoken: 'Bearer ' + loginDetailsObj[0].session.data.jwtToken,
-        apikey: 'jkFNrQQQ',
-        feedtype: loginDetailsObj[0].session.data.feedToken,
-    });
 }
 
 

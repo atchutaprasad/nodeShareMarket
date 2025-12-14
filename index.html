@@ -34,9 +34,6 @@
               <label for="totp" class="visually-hidden">TOTP</label>
               <input type="text" class="form-control" id="totp" placeholder="totp">
             </div>
-            <!--<div class="col">
-              <button type="button" onclick="loginAngleOneSession()" class="btn btn-info">Login</button>
-            </div>-->
             <div class="col">
               <button type="button" onclick="fullyAutomateLogin()" class="btn btn-info">Auto Login</button>
             </div>
@@ -44,150 +41,10 @@
           </form>
         </div>
 
-        <div id="angleOneCode">
-          <div class="row">
-            <div class="col">
-              <!--<img src="/images/1.jpg"/> <div style="float: right;"><a href="javascript:void(0)" onclick="generateSession()" >Generate Token</a></div>-->
-
-              <div style="float: right;">
-                <button type="button" class="btn" onclick="generateSession()" title="Re-generate Token"
-                  alt="Re-generate Token"> <i class="bi bi-brush"></i> </button>
-
-                <button type="button" class="btn" onclick="logOutAngleOneSession()" title="Logout" alt="Logout"> <i
-                    class="bi bi-sign-stop"> </i></button>
-                <button type="button" class="btn" onclick="hideUnwantedTags()" title="Hide Unwanted Tags"
-                  alt="Hide Unwanted Tags"> <i class="bi bi-basket"></i></button>
-
-
-              </div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col">
-              <h1>Angle One</h1>
-            </div>
-          </div>
-          <div class="row hideUnwantedTag">
-            <div class="col">
-              <button type="button" class="btn" onclick="profileDetails(event)" data-tag="profiledetails"
-                title="Profile Details" alt="Profile Details"> <i class="bi bi-rocket-takeoff"></i> Profile Details
-              </button>
-            </div>
-            <div class="col">
-              <button type="button" class="btn" onclick="rmsDetails(event)" data-tag="rmsdetails" title="RMS Details"
-                alt="RMS Details"> <i class="bi bi-box-arrow-down-right"></i> RMS Details </button>
-            </div>
-            <div class="col">
-              <button type="button" class="btn" onclick="loadRawStokes(event)" data-tag="loadRawStokes"
-                title="Raw Stokes" alt="Raw Stokes"> <i class="bi bi-box-arrow-in-down"></i> Load Raw Stoke Details
-              </button>
-            </div>
-
-            <div class="col">
-              <div class="btn-group dropup" role="group">
-                <button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                  <i class="bi bi-box-arrow-in-down"></i> Intraday Stoke Details
-                </button>
-                <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" onclick="intradayStokes(event)" href="#" data-tag="intradayStokes">Insert
-                      Stokes</a></li>
-                  <li><a class="dropdown-item" onclick="intradayFetchStokes(event)" href="#"
-                      data-tag="intradayStokes">Fetch Stokes</a></li>
-                </ul>
-              </div>
-
-              <!-- <button type="button" class="btn" onclick="intradayStokes(event)" data-tag="intradayStokes"
-                title="intraday Stokes" alt="intraday Stokes"> <i class="bi bi-box-arrow-in-down"></i> Intraday Stoke Details
-              </button> -->
-            </div>
-
-          </div>
-
-          <div class="row hideUnwantedTag">
-            <div class="col">&nbsp;</div>
-          </div>
-
-          <div class="row hideUnwantedTag">
-            <div class="col tabsHide" id="profiledetails"></div>
-            <div class="col tabsHide" id="rmsdetails"></div>
-            <div class="col tabsHide" id="loadRawStokes">
-              <div class="table-responsive freezeHeight">
-                <table class="table table-striped table-hover table-bordered">
-                  <thead class="sticky-top">
-                    <tr>
-                      <th scope="col">#</th>
-                      <th scope="col">token</th>
-                      <th scope="col">symbol</th>
-                      <th scope="col">name</th>
-                      <th scope="col">instrumenttype</th>
-                      <th scope="col">tick_size</th>
-                      <th scope="col">lotsize</th>
-                      <th scope="col">strike</th>
-                    </tr>
-                  </thead>
-                  <tbody id="loadRawStokesData">
-
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <div class="col tabsHide" id="intradayStokes">
-              <div class="table-responsive freezeHeight">
-                <table class="table table-striped table-hover table-bordered">
-                  <thead class="sticky-top">
-                    <tr>
-                      <th scope="col">#</th>
-                      <th scope="col">Exchange</th>
-                      <th scope="col">Symbol</th>
-                      <th scope="col">Multiplier</th>
-                      <th scope="col">Instrument Type</th>
-                      <th scope="col">Tick Size</th>
-                      <th scope="col">Lot Size</th>
-                      <th scope="col">Strike</th>
-                    </tr>
-                  </thead>
-                  <tbody id="intradayStokesData">
-
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <div class="row hideUnwantedTag">
-            <div class="col">&nbsp;</div>
-          </div>
-
-
-
-
-          <div class="row">
-            <div class="col">
-              <p>Select the Stock </p>
-            </div>
-            <div class="col">
-              <select class="form-control" id="stokeSelected" name="stockSelected">
-                <option value="RELIANCE">RELIANCE</option>
-                <option value="INFY">INFOSYS</option>
-                <option value="TCS">TCS</option>
-                <option value="WIPRO">WIPRO</option>
-                <option value="ICICIBANK">ICICI Bank</option>
-                <option value="ITC">ITC</option>
-              </select>
-              <div id="result"></div>
-            </div>
-            <div class="col">
-              <button type="button" onclick="selectedStokeSubmit()" name="button" class="btn btn-info mb-3">
-                Fetch Data
-              </button>
-            </div>
-
-          </div>
-        </div>
         <div id="updates">
           <div class="row">
             <div class="col">
-              <h2>Fully Automate Stoke Details</h2>
+              <h2>Fully Automate Stoke Details - New</h2>
             </div>
             <div class="col">
               <div style="float: right;">

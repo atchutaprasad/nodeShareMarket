@@ -43,11 +43,15 @@ mongo DB client ( compass ) and mongo DB run in cmd mode:
 Start the app:
   npm install -g pm2
   cd /var/www/stokeDec2025
-  pm2 start server.js
+  pm2 start server.js ( use -f, if 3000 has duplication)
   pm2 startup
   pm2 save
   pm2 logs
   pm2 flush
+
+stop the app:
+  pm2 list
+  pm2 stop server or pm2 stop <id>
 
 Restart the app :
   pm2 restart server.js

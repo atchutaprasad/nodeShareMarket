@@ -45,5 +45,6 @@ const RawSchema = new mongoose.Schema(
     }
 );
 
-const RawStokes = mongoose.model("RawStokes", RawSchema);
+const dynamicCollectionName = "RawStokes";//+(new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })).split(',')[0];
+const RawStokes = mongoose.model(dynamicCollectionName, RawSchema);
 module.exports = RawStokes;

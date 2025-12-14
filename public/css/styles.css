@@ -46,7 +46,7 @@
    display: block;
  }
 
- #angleOneCode,.tabsHide {
+ .tabsHide {
    display: none;
  }
 

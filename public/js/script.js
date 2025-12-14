@@ -23,7 +23,8 @@ var ajaxPOSTCall = (api, postData, callback) => {
                 localStorage.clear();
                 $('#angleOneCode').hide();
                 $('#generateSession').show();
-                alert('In valid token, Please login to start');
+                $('#updates').hide();
+                alert('In valid token, Please login to start - post ajax call');
             } else {
                 callback(data);
             }
@@ -52,7 +53,8 @@ var ajaxGETCall = (api, callback) => {
                 localStorage.clear();
                 $('#angleOneCode').hide();
                 $('#generateSession').show();
-                alert('In valid token, Please login to start');
+                $('#updates').hide();
+                alert('In-valid token, Please login to start - get ajax call');
             } else {
                 callback(data);
             }

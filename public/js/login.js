@@ -1,16 +1,16 @@
-var loginAngleOneSession = () => {
-    ajaxGETCall('/api/log/login?totp=' + $('#totp').val(), angleOneLoginSessionCallback);
-}
+// var loginAngleOneSession = () => {
+//     ajaxGETCall('/api/log/login?totp=' + $('#totp').val(), angleOneLoginSessionCallback);
+// }
 
-var angleOneLoginSessionCallback = (response) => {
-    if (response.status) {
-        setAuthenticator(response);
-        $('#angleOneCode').show();
-        $('#generateSession').hide();
-    } else {
-        alert('failed ' + response.message)
-    }
-}
+// var angleOneLoginSessionCallback = (response) => {
+//     if (response.status) {
+//         setAuthenticator(response);
+//         $('#angleOneCode').show();
+//         $('#generateSession').hide();
+//     } else {
+//         alert('failed ' + response.message)
+//     }
+// }
 
 var fullyAutomateLogout = () => {
     ajaxGETCall('/api/log/fullyAutomateLogOut', fullyAutomateLogOutCallback);
@@ -68,7 +68,7 @@ var fullyAutomateLoginCallback = (res) => {
         // debugger
         document.getElementById("percentChangeResult").innerHTML = percentChangeResult + '%';
     } else {
-        alert('login failed');
+        alert('login failed  - intraday stokes not found');
         $('#updates').hide();
         $('#generateSession').show();
         localStorage.setItem('setAutoLogin', 'false');

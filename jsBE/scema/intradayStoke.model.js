@@ -60,6 +60,7 @@ const IntradaySchema = new mongoose.Schema(
         }
     }
 );
+const dynamicCollectionName = "Intradays";//+(new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })).split(',')[0];
 
-const Intraday = mongoose.model("Intraday", IntradaySchema);
+const Intraday = mongoose.model(dynamicCollectionName, IntradaySchema);
 module.exports = Intraday;

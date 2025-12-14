@@ -151,18 +151,20 @@ var logOutAngleOneSessionCallback = (response) => {
 }
 
 var onLoadEvents = () => {
-    if (localStorage.getItem('setAutoLogin') && (localStorage.getItem('setAutoLogin') === 'true' || localStorage.getItem('setAutoLogin') === true)) {
-        $('#updates').show();
-        $('#generateSession').hide();
-        checkSession();
-    } else {
-        $('#updates').hide();
-        $('#generateSession').show();
-    }
-    if (localStorage.getItem('auth')) {
-        $('#angleOneCode').show();
-        $('#generateSession').hide();
-    }
+
+     checkSession();
+    // if (localStorage.getItem('setAutoLogin') && (localStorage.getItem('setAutoLogin') === 'true' || localStorage.getItem('setAutoLogin') === true)) {
+    //     $('#updates').show();
+    //     $('#generateSession').hide();
+    //     checkSession();
+    // } else {
+    //     $('#updates').hide();
+    //     $('#generateSession').show();
+    // }
+    // if (localStorage.getItem('auth')) {
+    //     $('#angleOneCode').show();
+    //     $('#generateSession').hide();
+    // }
 
     // const socket = io();
     // socket.on('serverData', (data) => {
