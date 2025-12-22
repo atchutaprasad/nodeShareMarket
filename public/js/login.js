@@ -1,16 +1,16 @@
-// var loginAngleOneSession = () => {
-//     ajaxGETCall('/api/log/login?totp=' + $('#totp').val(), angleOneLoginSessionCallback);
-// }
+var loginAngleOneSession = () => {
+    ajaxGETCall('/api/log/login?totp=' + $('#totp').val(), angleOneLoginSessionCallback);
+}
 
-// var angleOneLoginSessionCallback = (response) => {
-//     if (response.status) {
-//         setAuthenticator(response);
-//         $('#angleOneCode').show();
-//         $('#generateSession').hide();
-//     } else {
-//         alert('failed ' + response.message)
-//     }
-// }
+var angleOneLoginSessionCallback = (response) => {
+    if (response.status) {
+        setAuthenticator(response);
+        $('#angleOneCode').show();
+        $('#generateSession').hide();
+    } else {
+        alert('failed ' + response.message)
+    }
+}
 
 var fullyAutomateLogout = () => {
     ajaxGETCall('/api/log/fullyAutomateLogOut', fullyAutomateLogOutCallback);
@@ -44,8 +44,8 @@ var stopFullyAutomateLTP = () => {
 }
 
 
-var lucky = () => {
-    ajaxGETCall('/api/lucky/history', fullyAutomateLoginCallback); 
+var getHistory = () => {
+    ajaxGETCall('/api/lucky/history?fromDate=' + $('#fromDate').val() + '&toDate=' + $('#toDate').val(), fullyAutomateLoginCallback); 
 }
 
 var fullyAutomateLoginCallback = (res) => {
@@ -65,7 +65,8 @@ var fullyAutomateLoginCallback = (res) => {
                     <td>${obj.name}</td>
                     <td>${htmlReturn(obj, obj.open, obj.openTime)}</td>
                     <td><div>${htmlReturn(obj, obj.ltp, obj.ltpTime)}</div></td>
-                    <td>${obj.history}</td>
+                    <td>${obj.history[0]}</td>
+                    <td>${obj.history[1]}</td>
                     <td>${obj.percentChange}</td>
                     </tr>`;
         });
@@ -99,6 +100,31 @@ var sortTable = (column) => {
         } else {
             constants.stokesListIsAscending = true;
             stokes = constants.stokesList.sort((a, b) => b.name.localeCompare(a.name));
+        }
+    } else if (column === "history") {
+        if (constants.stokesListIsAscending) {
+            constants.stokesListIsAscending = false;
+            console.log('column - ' + column);
+            stokes = constants.stokesList.sort((a, b) => b.history[0].split(',').pop() - a.history[0].split(',').pop());
+        } else {
+            constants.stokesListIsAscending = true;
+            stokes = constants.stokesList.sort((a, b) => a.history[0].split(',').pop() - b.history[0].split(',').pop());
+        }
+    } else if (column === "volume") {
+        if (constants.stokesListIsAscending) {
+            constants.stokesListIsAscending = false;
+            console.log('column - ' + column);
+            stokes = constants.stokesList.sort((a, b) => {
+                console.log('a.history[1] - ' + a.history[1]);
+                console.log('b.history[1] - ' + b.history[1]);
+
+                return a.history[1] && b.history[1] ? (b.history[1]).localeCompare(a.history[1]) : 0;
+            });
+        } else {
+            constants.stokesListIsAscending = true;
+            stokes = constants.stokesList.sort((a, b) => {
+                return a.history[1] && b.history[1] ? (a.history[1]).localeCompare(b.history[1]) : 0;
+            });
         }
     } else {
         if (constants.stokesListIsAscending) {

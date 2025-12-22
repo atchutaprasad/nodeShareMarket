@@ -39,7 +39,8 @@
               <input type="text" class="form-control" id="totp" placeholder="totp">
             </div>
             <div class="col">
-              <button type="button" onclick="fullyAutomateLogin()" class="btn btn-info">Auto Login</button>
+              <button type="button" onclick="loginAngleOneSession()" class="btn btn-info"><i
+                    class="bi bi-door-open"></i></button><button type="button" onclick="fullyAutomateLogin()" class="btn btn-info">Auto Login</button>
             </div>
             <div class="col-3"></div>
           </form>
@@ -60,11 +61,16 @@
                     class="bi bi-tag-fill"> </i> Start LTP </button>
                 <button type="button" class="btn" onclick="stopFullyAutomateLTP()" title="Stop LTP" alt="Stop LTP"> <i
                     class="bi bi-tag"> </i> Stop LTP </button>
-                    <button type="button" class="btn" onclick="lucky()" title="Stop LTP" alt="Stop LTP"> <i
-                    class="bi bi-clock-history"> </i> lucky </button>
+                    
               </div>
             </div>
           </div>
+          <div> 
+            Validate Start Date: <input type="date" id="fromDate" name="date-start" /> <br/> Validate End Date: <input type="date" id="toDate" name="date-end" /><br/>
+            <button type="button" class="btn" onclick="getHistory()" title="Get History" alt="Get History"> <i
+                    class="bi bi-clock-history"> </i> Get History </button>
+            
+           </div>
           <div class="row">
             <div class="col">&nbsp;</div>
           </div>
@@ -80,6 +86,7 @@
                       <th scope="col" onclick="sortTable('open')">Open</th>
                       <th scope="col" onclick="sortTable('ltp')">LTP</th>
                       <th scope="col" onclick="sortTable('history')">History</th>
+                      <th scope="col" onclick="sortTable('volume')">Volume</th>
                       <th scope="col" onclick="sortTable('percentChange')">Percent Change</th>
                     </tr>
                   </thead>

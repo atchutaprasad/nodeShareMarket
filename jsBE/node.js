@@ -5,7 +5,7 @@ const angleOneJS = require('./jsBE/parameters');
 //const { default: mongoose } = require('mongoose');
 //var bodyParser = require('body-parser');
 
-const Intraday = require('./jsBE/scema/intradayStoke.model')
+const {Intraday} = require('./jsBE/scema/intradayStoke.model')
 
 app.delete('/api/insertIntradayList', async (req, res) => {
    try {

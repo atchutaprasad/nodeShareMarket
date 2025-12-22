@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 let { SmartAPI, WebSocket, WebSocketV2 } = require('smartapi-javascript');
 const parameters = require('../parameters.js');
 let RawStokes = require('../scema/rawStoke.model');
-let Intraday = require('../scema/intradayStoke.model');
+let {Intraday} = require('../scema/intradayStoke.model');
 let AutoLogin = require('../scema/loginDetails.model');
 let UtilitySchema = require('../scema/utility.model');
 let loginLogoutController = require('./loginLogout.controller');
@@ -197,8 +197,8 @@ const rotateLTPRequests = async (config) => {
     }).catch((error) => {
         if (error.isAxiosError) {
             // Optionally log a minimal message or skip logging
-            console.error('Axios error occurred ------ ', error.response?.data);
-            return; // Do nothing, suppress log
+            console.error('Axios error occurred ------ ', config.data , error.response?.data);
+            //return; // Do nothing, suppress log
         }
         // Log other errors if needed
         console.error(error);

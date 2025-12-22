@@ -2,7 +2,7 @@ var axios = require("axios");
 const mongoose = require('mongoose');
 
 const parameters = require('../parameters.js');
-let Intraday = require('../scema/intradayStoke.model');
+let {Intraday} = require('../scema/intradayStoke.model');
 let autoLogin = require('../scema/loginDetails.model');
 let intradayController = require('./intraday.controller');
 let RawStokes = require('../scema/rawStoke.model');
@@ -11,9 +11,16 @@ let RawStokes = require('../scema/rawStoke.model');
 
 const login = async (req, res) => {
    let loginParams = parameters.loginParams(req.query.totp);
-   await axios(loginParams).then(async (loginResponse) => {
-      res.json(loginResponse.data);
-   }).catch((error) => { res.json(error); });
+   const loginResponse = await axios(loginParams);
+
+   // Save the session details to MongoDB
+   // Create a new document using the model and save it to the database
+   await autoLogin.deleteMany({});
+   const loginDetails = new autoLogin({ session: loginResponse.data });
+   await loginDetails.save();
+   console.log('loginDetails Saved');
+   res.json(loginResponse.data);
+
 };
 
 const logOut = async (req, res) => {
@@ -70,7 +77,7 @@ const fullyAutomateLogin = async (req, res) => {
       const RawStokesStokes = rawStokesfilteredData.map(item => new RawStokes(item));
       await RawStokes.insertMany(RawStokesStokes);
       const intradayResults = await intradayController.fullyAutomateFetchIntradayStokes();
-      console.log('intradayResults' + intradayResults.length)
+      console.log('intradayResults -' + intradayResults.length)
       res.json(intradayResults);
    } catch (error) { console.log(error); res.json({ message: JSON.stringify(error) }); }
 
