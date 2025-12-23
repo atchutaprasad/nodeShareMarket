@@ -104,7 +104,7 @@ var sortTable = (column) => {
     } else if (column === "history") {
         if (constants.stokesListIsAscending) {
             constants.stokesListIsAscending = false;
-            console.log('column - ' + column);
+          //  console.log('column - ' + column);
             stokes = constants.stokesList.sort((a, b) => b.history[0].split(',').pop() - a.history[0].split(',').pop());
         } else {
             constants.stokesListIsAscending = true;
@@ -113,10 +113,10 @@ var sortTable = (column) => {
     } else if (column === "volume") {
         if (constants.stokesListIsAscending) {
             constants.stokesListIsAscending = false;
-            console.log('column - ' + column);
+            //console.log('column - ' + column);
             stokes = constants.stokesList.sort((a, b) => {
-                console.log('a.history[1] - ' + a.history[1]);
-                console.log('b.history[1] - ' + b.history[1]);
+              //  console.log('a.history[1] - ' + a.history[1]);
+             //   console.log('b.history[1] - ' + b.history[1]);
 
                 return a.history[1] && b.history[1] ? (b.history[1]).localeCompare(a.history[1]) : 0;
             });

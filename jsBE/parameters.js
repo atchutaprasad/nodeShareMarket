@@ -1,184 +1,88 @@
 
 var loginParams = (totp) => {
     var data = JSON.stringify({
-        "clientcode": "V112910",
-        "password": "1984",
+        "clientcode": process.env.ANGEL_CLIENT_CODE,
+        "password": process.env.ANGEL_PASSWORD,
         "totp": totp,
         "state": 'live' + new Date().getTime()
     });
+    //console.log('loginParams data - ', data);
     var config = {
         method: 'post',
         url: 'https://apiconnect.angelone.in/rest/auth/angelbroking/user/v1/loginByPassword',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-UserType': 'USER',
-            'X-SourceID': 'WEB',
-            'X-ClientLocalIP': '192.168.0.108',
-            'X-ClientPublicIP': '192.168.0.1',
-            'X-MACAddress': 'E4-B9-7A-08-0D-2B',
-            'X-PrivateKey': 'jkFNrQQQ'
-        },
         data: data
     };
+   // console.log('loginParams config - ', config);
     return config;
 }
 
-var generateToken = (authorization, REFRESH_TOKEN) => {
+var generateToken = (REFRESH_TOKEN) => {
     var data = JSON.stringify({
         "refreshToken": REFRESH_TOKEN
     });
     var config = {
         method: 'post',
         url: 'https://apiconnect.angelone.in/rest/auth/angelbroking/jwt/v1/generateTokens',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': authorization,
-            'Accept': 'application/json',
-            'X-UserType': 'USER',
-            'X-SourceID': 'WEB',
-            'X-ClientLocalIP': '192.168.0.108',
-            'X-ClientPublicIP': '192.168.0.1',
-            'X-MACAddress': 'E4-B9-7A-08-0D-2B',
-            'X-PrivateKey': 'jkFNrQQQ'
-        },
         data: data
     };
     return config;
 }
 
-var profileDetailsParams = (authorization) => {
+var profileDetailsParams = () => {
     var config = {
         method: 'get',
         url: 'https://apiconnect.angelone.in/rest/secure/angelbroking/user/v1/getProfile',
-        headers: {
-            'Authorization': authorization,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-UserType': 'USER',
-            'X-SourceID': 'WEB',
-            'X-ClientLocalIP': '192.168.0.108',
-            'X-ClientPublicIP': '192.168.0.1',
-            'X-MACAddress': 'E4-B9-7A-08-0D-2B',
-            'X-PrivateKey': 'jkFNrQQQ'
-        }
     };
     return config;
 }
 
-var rmsDetailsParams = (authorization) => {
+var rmsDetailsParams = () => {
     var config = {
         method: 'get',
         url: 'https://apiconnect.angelone.in/rest/secure/angelbroking/user/v1/getRMS',
-        headers: {
-            'Authorization': authorization,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-UserType': 'USER',
-            'X-SourceID': 'WEB',
-            'X-ClientLocalIP': '192.168.0.108',
-            'X-ClientPublicIP': '192.168.0.1',
-            'X-MACAddress': 'E4-B9-7A-08-0D-2B',
-            'X-PrivateKey': 'jkFNrQQQ'
-        }
     };
     return config;
 }
 
-var loadRawStokesParams = (authorization) => {
+var loadRawStokesParams = () => {
     var config = {
         method: 'get',
         url: 'https://margincalculator.angelone.in/OpenAPI_File/files/OpenAPIScripMaster.json',
-        headers: {
-            'Authorization': authorization,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-UserType': 'USER',
-            'X-SourceID': 'WEB',
-            'X-ClientLocalIP': '192.168.0.108',
-            'X-ClientPublicIP': '192.168.0.1',
-            'X-MACAddress': 'E4-B9-7A-08-0D-2B',
-            'X-PrivateKey': 'jkFNrQQQ'
-        }
     };
     return config;
 }
 
-var intradayStokesParams = (authorization) => {
+var intradayStokesParams = () => {
     var config = {
         method: 'get',
         url: 'https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/nseIntraday',
-        headers: {
-            'Authorization': authorization,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-UserType': 'USER',
-            'X-SourceID': 'WEB',
-            'X-ClientLocalIP': '192.168.0.108',
-            'X-ClientPublicIP': '192.168.0.1',
-            'X-MACAddress': 'E4-B9-7A-08-0D-2B',
-            'X-PrivateKey': 'jkFNrQQQ'
-        }
     };
     return config;
 }
 
-var intradayQuoatesParams = (authorization, data) => {
+var intradayQuoatesParams = (data) => {
     var config = {
         method: 'post',
         url: 'https://apiconnect.angelone.in/rest/secure/angelbroking/market/v1/quote/',
-        headers: {
-            'Authorization': authorization,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-UserType': 'USER',
-            'X-SourceID': 'WEB',
-            'X-ClientLocalIP': '192.168.0.108',
-            'X-ClientPublicIP': '192.168.0.1',
-            'X-MACAddress': 'E4-B9-7A-08-0D-2B',
-            'X-PrivateKey': 'jkFNrQQQ'
-        },
         data: JSON.stringify(data)
     };
     return config;
 }
 
-var getCandleDataParams = (authorization, data) => {
+var getCandleDataParams = (data) => {
     var config = {
         method: 'post',
         url: 'https://apiconnect.angelone.in/rest/secure/angelbroking/historical/v1/getCandleData',
-        headers: {
-            'Authorization': authorization,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-UserType': 'USER',
-            'X-SourceID': 'WEB',
-            'X-ClientLocalIP': '192.168.0.108',
-            'X-ClientPublicIP': '192.168.0.1',
-            'X-MACAddress': 'E4-B9-7A-08-0D-2B',
-            'X-PrivateKey': 'jkFNrQQQ'
-        },
         data: JSON.stringify(data)
     };
     return config;
 }
 
-var logOutParams = (authorization) => {
+var logOutParams = () => {
     var data = { clientcode: "V112910" }
     var config = {
         method: 'post',
         url: 'https://apiconnect.angelone.in/rest/secure/angelbroking/user/v1/logout',
-        headers: {
-            'Authorization': authorization,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-UserType': 'USER',
-            'X-SourceID': 'WEB',
-            'X-ClientLocalIP': '192.168.0.108',
-            'X-ClientPublicIP': '192.168.0.1',
-            'X-MACAddress': 'E4-B9-7A-08-0D-2B',
-            'X-PrivateKey': 'jkFNrQQQ'
-        },
         data: data
     };
     return config;

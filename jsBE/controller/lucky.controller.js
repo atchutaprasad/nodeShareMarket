@@ -1,4 +1,4 @@
-var axios = require("axios");
+var axios = require('../axiosInterceptor');
 const mongoose = require('mongoose');
 let AutoLogin = require('../scema/loginDetails.model');
 const parameters = require('../parameters.js');
@@ -35,11 +35,7 @@ const getHistory = async (req, res) => {
         console.log('Fetching history for date:', fromDateString, ' to ', toDateString);
         //dateString = dateString.trim();
         // Use AutoLogin to fetch saved jwt token
-        let loginDetailsObj = await AutoLogin.find({});
-        // if (!loginDetailsObj || loginDetailsObj.length === 0) {
-        //     return res.status(400).json({ status: false, message: 'No active session found. Login first.' });
-        // }
-        const authorization = 'Bearer ' + loginDetailsObj[0].session.data.jwtToken;
+        
 
 
         const intradayRecords = await Intraday.find({});
@@ -55,7 +51,7 @@ const getHistory = async (req, res) => {
                     "fromdate": `${fromDateString} 00:00`,
                     "todate": `${toDateString} 23:59`
                 };
-                const config = parameters.getCandleDataParams(authorization, requestBody);
+                const config = parameters.getCandleDataParams(requestBody);
                 const response = await axios(config).catch((error) => {
                     if (error.isAxiosError) {
                         // Optionally log a minimal message or skip logging

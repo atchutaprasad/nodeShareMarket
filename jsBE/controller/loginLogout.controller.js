@@ -1,4 +1,4 @@
-var axios = require("axios");
+var axios = require('../axiosInterceptor');
 const mongoose = require('mongoose');
 
 const parameters = require('../parameters.js');
@@ -18,15 +18,14 @@ const login = async (req, res) => {
    await autoLogin.deleteMany({});
    const loginDetails = new autoLogin({ session: loginResponse.data });
    await loginDetails.save();
-   console.log('loginDetails Saved');
+   //console.log('loginDetails Saved');
    res.json(loginResponse.data);
 
 };
 
 const logOut = async (req, res) => {
    //await mongoose.disconnect();
-   const authorization = req.headers['authorization'];
-   let config = parameters.logOutParams(authorization);
+   let config = parameters.logOutParams();
    await axios(config).then((response) => { res.json(response.data); }).catch((error) => { res.json(error); });
 }
 
@@ -54,12 +53,11 @@ const fullyAutomateLogin = async (req, res) => {
       await loginDetails.save();
       console.log('loginDetails Saved');
       // Fetch and return all login details from the database
-      const authorization = 'Bearer ' + fullyAutomateLoginDetails.data.data.jwtToken;
-      console.log('loginDetails Auth - ' + authorization);
-      let intradayConfig = parameters.intradayStokesParams(authorization);
-      console.log('intradayConfig - ' + intradayConfig);
+      
+      let intradayConfig = parameters.intradayStokesParams();
+      console.log('intradayConfig - ' , intradayConfig);
       const intradayStokeAPI = await axios(intradayConfig);
-      console.log('intradayStokes length - ' + intradayStokeAPI.data.data.length);
+      console.log('intradayStokes length - ' , intradayStokeAPI.data.data.length);
       await Intraday.deleteMany({});
       const intradayStokes = intradayStokeAPI.data.data.map(item => {
          item.name = item.SymbolName;
@@ -67,17 +65,17 @@ const fullyAutomateLogin = async (req, res) => {
          return new Intraday(item);
       });
       await Intraday.insertMany(intradayStokes);
-      let rawConfig = parameters.loadRawStokesParams(authorization);
-      console.log('intradayConfig - ' + intradayConfig);
+      let rawConfig = parameters.loadRawStokesParams();
+      console.log('intradayConfig - ' , intradayConfig);
       const rawStokeAPI = await axios(rawConfig);
       const rawStokesfilteredData = await intradayController.rawStokesFilter(rawStokeAPI.data);
-      console.log('rawStokesfilteredData - ' + rawStokesfilteredData.length);
-      console.log('intradayConfig - ' + intradayConfig);
+      console.log('rawStokesfilteredData - ' , rawStokesfilteredData.length);
+      console.log('intradayConfig - ' , intradayConfig);
       await RawStokes.deleteMany({});
       const RawStokesStokes = rawStokesfilteredData.map(item => new RawStokes(item));
       await RawStokes.insertMany(RawStokesStokes);
       const intradayResults = await intradayController.fullyAutomateFetchIntradayStokes();
-      console.log('intradayResults -' + intradayResults.length)
+      console.log('intradayResults login - ' , intradayResults.length)
       res.json(intradayResults);
    } catch (error) { console.log(error); res.json({ message: JSON.stringify(error) }); }
 

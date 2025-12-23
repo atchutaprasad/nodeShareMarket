@@ -1,4 +1,4 @@
-var axios = require("axios");
+var axios = require('../axiosInterceptor');
 const mongoose = require('mongoose');
 
 let { SmartAPI, WebSocket, WebSocketV2 } = require('smartapi-javascript');
@@ -22,8 +22,7 @@ const rawStokesFilter = (arr) => {
     return x;
 };
 const insertRawStokes = async (req, res) => {
-    const authorization = req.headers['authorization'];
-    let config = parameters.loadRawStokesParams(authorization);
+    let config = parameters.loadRawStokesParams();
     await axios(config).then(async (response) => {
         try {
             const filteredData = await rawStokesFilter(response.data);
@@ -40,8 +39,7 @@ const insertRawStokes = async (req, res) => {
 };
 
 const insertIntradayStokes = async (req, res) => {
-    const authorization = req.headers['authorization'];
-    let config = parameters.intradayStokesParams(authorization);
+    let config = parameters.intradayStokesParams();
     await axios(config).then(async (response) => {
         try {
             await Intraday.deleteMany({});
@@ -130,7 +128,7 @@ const fullyAutomateFetchIntradayStokes = async () => {
         }
     ])
     await Intraday.deleteMany({});
-    console.log('results - ' + result.length);
+    console.log('results - ' , result.length);
     //console.log(result);
     await Intraday.insertMany(result);
     await Intraday.deleteMany({ token: undefined })
@@ -144,6 +142,7 @@ const fullyAutomateLoadStokes = async (req, res) => {
 
 const rotateLTPRequests = async (config) => {
     await axios(config).then(async (response) => {
+        console.log('LTP response received with ', response);
         try {
             const ltpData = response.data.data.fetched;
             //console.log('LTP Data:', ltpData.length);
@@ -215,8 +214,6 @@ const rotateLTPRequests = async (config) => {
 const fullyAutomateLoadStokesInterval = async () => {
     const intradayRecords = await Intraday.find({});
     let tokens = intradayRecords.map(item => item.token.toString());
-    let loginDetailsObj = await AutoLogin.find({});
-    const authorization = 'Bearer ' + loginDetailsObj[0].session.data.jwtToken;
     const result = tokens.reduce((resultArray, item, index) => {
         const chunkIndex = Math.floor(index / 50)
         if (!resultArray[chunkIndex]) {
@@ -228,7 +225,7 @@ const fullyAutomateLoadStokesInterval = async () => {
     //console.log('Total Tokens:', result.length);
     result.forEach(async (item, index) => {
         let data = { "mode": "FULL", "exchangeTokens": { "NSE": item } }
-        let config = parameters.intradayQuoatesParams(authorization, data);
+        let config = parameters.intradayQuoatesParams(data);
         setTimeout(async () => { await rotateLTPRequests(config); }, index * 100);
     });
 
@@ -245,10 +242,10 @@ const fullyAutomateLTP = async (req, res) => {
             //console.log(utilitySchemaDetailsObj);
             if (utilitySchemaDetailsObj[0].ltpStatus == true) {
                 await fullyAutomateLoadStokesInterval();
-                console.log('interval running')
+                console.log('interval running at ' , new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
             } else {
                 clearInterval(intervalStopper);
-                console.log('interval cleared')
+                console.log('interval cleared at ', new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
             }
         }, 15000);
         //await webSocketManyV2();

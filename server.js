@@ -1,6 +1,8 @@
 // Add express in our project
 var express = require('express');
-const mongoose = require('mongoose');
+// load environment variables early
+require('dotenv').config();
+const db = require('./jsBE/db');
 
 //const { Server } = require("socket.io");
 //const http = require("http");
@@ -10,9 +12,17 @@ const mongoose = require('mongoose');
 // Creating the express app
 var app = express();
 const path = require('path'); // Required for absolute paths
-var socketIo = require('socket.io');
+//var socketIo = require('socket.io');
+
+// initialize axios interceptors (adds common headers + Authorization)
+//require('./jsBE/axiosInterceptor');
+const basicAuth = require('./jsBE/middleware/basicAuth');
 
 app.use(express.json());
+// Serve admin page via protected route
+app.get('/admin.html', basicAuth, function (req, res) {
+   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 
@@ -35,11 +45,17 @@ app.get("/", function (req, res) {
    res.sendFile(__dirname + "/index.html");
 })
 
-mongoose.connect("mongodb://admin:admin@localhost:27017/testDB").then(() => {
-   var port = 3000;
+// Start DB then server
+db.connectWithRetry().then(() => {
+   //console.log('Connected to DB');
+   // Start the server only after DB connection is established
+
+   var port = process.env.PORT || 3000;
    var server = app.listen(port, function () {
-      console.log(__dirname + '  -  ' + new Date());
+      console.log(__dirname + '  -  ' + new Date() + ' Server is running on port ' + port);
    })
+   //console.log('Server listening on port -' + process.env.PORT);
+   // Setup socket.io for real-time communication  
    // io = socketIo(server);
    // io.on('connection', (socket) => {
    //    console.log('A user connected');
@@ -54,5 +70,6 @@ mongoose.connect("mongodb://admin:admin@localhost:27017/testDB").then(() => {
    //    io.emit('serverData', dataToSend); // Emit data to all connected clients
    // }, interval);
 }).catch((e) => {
-   console.log(e)
+   console.error('Failed to connect to DB:', e && e.message ? e.message : e);
+   process.exit(1);
 })

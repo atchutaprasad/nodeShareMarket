@@ -1,4 +1,5 @@
 const { exec } = require('child_process');
+const axiosClient = require('../axiosInterceptor');
 
 
 const execAsync = (cmd) => new Promise((resolve, reject) => {
@@ -66,6 +67,13 @@ const stopPM2Server = (req, res) => {
     //     res.json({ status: true, message: `PM2 server stopped successfully: ${stdout}` });
     // });
 }
+const getRefreshMetrics = (req, res) => {
+    try {
+        res.json({ success: true, metrics: axiosClient.metrics });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message || err });
+    }
+}
 module.exports = {
-    restartPM2Server, startPM2Server, stopPM2Server
+    restartPM2Server, startPM2Server, stopPM2Server, getRefreshMetrics
 };

@@ -1,7 +1,7 @@
 let { SmartAPI, WebSocket, WebSocketV2 } = require('smartapi-javascript');
-var axios = require("axios");
+var axios = require('./axiosInterceptor');
 const nodeJS = require('./jsBE/node');
-const angleOneJS = require('./jsBE/parameters');
+//const angleOneJS = require('./jsBE/parameters');
 //const { default: mongoose } = require('mongoose');
 //var bodyParser = require('body-parser');
 
