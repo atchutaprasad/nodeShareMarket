@@ -64,10 +64,10 @@ var fullyAutomateLoginCallback = (res) => {
             html += `<tr><td>${index}</td>
                     <td>${obj.name}</td>
                     <td>${htmlReturn(obj, obj.open, obj.openTime)}</td>
-                    <td><div>${htmlReturn(obj, obj.ltp, obj.ltpTime)}</div></td>
-                    <td>${obj.history[0]}</td>
-                    <td>${obj.history[1]}</td>
-                    <td>${obj.percentChange}</td>
+                    <td><div>${htmlReturn(obj, obj.ltp, obj.ltpTime, obj.ltpPercentage)}</div></td>
+                    <td>${obj.history[0] ? obj.history[0] : ''}</td>
+                    <td>${obj.history[1] ? obj.history[1] : ''}</td>
+                    <td>${obj.percentChange ? obj.percentChange.toFixed(2) + '%' : ''}</td>
                     </tr>`;
         });
         html += '';
@@ -82,11 +82,12 @@ var fullyAutomateLoginCallback = (res) => {
     }
 }
 
-var htmlReturn = (obj, arrayElements, timer) => {
+var htmlReturn = (obj, arrayElements, timer, ltpPercentage) => {
     //let ltpList = obj.split(',')
     let html = '';
     $.each(arrayElements, function (index, arrayElement) {
-        html += `${arrayElement} - ${timer[index]} <br/>`;
+        console.log(obj.name, ltpPercentage)
+        html += `${ltpPercentage && ltpPercentage[index] ? ltpPercentage[index].toFixed(2) + ' - ' : ''} ${arrayElement} - ${timer[index]} <br/>`;
     });
     return html;
 }
@@ -105,10 +106,10 @@ var sortTable = (column) => {
         if (constants.stokesListIsAscending) {
             constants.stokesListIsAscending = false;
           //  console.log('column - ' + column);
-            stokes = constants.stokesList.sort((a, b) => b.history[0].split(',').pop() - a.history[0].split(',').pop());
+            stokes = constants.stokesList.sort((a, b) => (b.history[0].split(',')).at(-1) - (a.history[0].split(',')).at(-1));
         } else {
             constants.stokesListIsAscending = true;
-            stokes = constants.stokesList.sort((a, b) => a.history[0].split(',').pop() - b.history[0].split(',').pop());
+            stokes = constants.stokesList.sort((a, b) => (a.history[0].split(',')).at(-1) - (b.history[0].split(',')).at(-1));
         }
     } else if (column === "volume") {
         if (constants.stokesListIsAscending) {

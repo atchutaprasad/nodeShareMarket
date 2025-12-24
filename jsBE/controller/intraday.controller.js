@@ -1,13 +1,14 @@
 var axios = require('../axiosInterceptor');
-const mongoose = require('mongoose');
+//const mongoose = require('mongoose');
+const cronJob = require('node-cron');
 
-let { SmartAPI, WebSocket, WebSocketV2 } = require('smartapi-javascript');
+//let { SmartAPI, WebSocket, WebSocketV2 } = require('smartapi-javascript');
 const parameters = require('../parameters.js');
 let RawStokes = require('../scema/rawStoke.model');
-let {Intraday} = require('../scema/intradayStoke.model');
-let AutoLogin = require('../scema/loginDetails.model');
+let { Intraday } = require('../scema/intradayStoke.model');
+//let AutoLogin = require('../scema/loginDetails.model');
 let UtilitySchema = require('../scema/utility.model');
-let loginLogoutController = require('./loginLogout.controller');
+//let loginLogoutController = require('./loginLogout.controller');
 //const WSOrderUpdates = require('smartapi-javascript/src/websocket-order-updates');
 let intervalStopper;
 
@@ -128,7 +129,7 @@ const fullyAutomateFetchIntradayStokes = async () => {
         }
     ])
     await Intraday.deleteMany({});
-    console.log('results - ' , result.length);
+    console.log('results - ', result.length);
     //console.log(result);
     await Intraday.insertMany(result);
     await Intraday.deleteMany({ token: undefined })
@@ -142,7 +143,7 @@ const fullyAutomateLoadStokes = async (req, res) => {
 
 const rotateLTPRequests = async (config) => {
     await axios(config).then(async (response) => {
-        console.log('LTP response received with ', response);
+        //console.log('LTP response received with ', response);
         try {
             const ltpData = response.data.data.fetched;
             //console.log('LTP Data:', ltpData.length);
@@ -163,6 +164,7 @@ const rotateLTPRequests = async (config) => {
                 if (stoke.ltp && stoke.ltp.length > 1 && stoke.ltp.at(-1) !== ltpItem.ltp) {
                     updateObj.ltp = ltpItem.ltp;
                     updateObj.ltpTime = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+                    updateObj.ltpPercentage = ((ltpItem.ltp - ltpItem.open) / ltpItem.open) * 100; //ltpItem.ltpPercentage;
                 }
                 if (stoke.open && stoke.open.length > 1 && stoke.open.at(-1) !== ltpItem.open) {
                     updateObj.open = ltpItem.open;
@@ -172,7 +174,8 @@ const rotateLTPRequests = async (config) => {
 
                 if (stoke.ltp && stoke.ltp.length < 2) {
                     updateObj.ltp = ltpItem.ltp;
-                    updateObj.ltpTime = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+                    updateObj.ltpTime = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+                    updateObj.ltpPercentage = ((ltpItem.ltp - ltpItem.open) / ltpItem.open) * 100; //ltpItem.ltpPercentage;
                 }
                 if (stoke.open && stoke.open.length < 2) {
                     updateObj.open = ltpItem.open;
@@ -196,11 +199,11 @@ const rotateLTPRequests = async (config) => {
     }).catch((error) => {
         if (error.isAxiosError) {
             // Optionally log a minimal message or skip logging
-            console.error('Axios error occurred ------ ', config.data , error.response?.data);
+            console.error('Axios error occurred ------ ', config.data, error.response?.data);
             //return; // Do nothing, suppress log
         }
         // Log other errors if needed
-        console.error(error);
+        //console.error(error);
 
         //console.log('response failed data:', JSON.stringify(error.response.data));
         //console.log('response failed data 2:', config.data);
@@ -242,7 +245,7 @@ const fullyAutomateLTP = async (req, res) => {
             //console.log(utilitySchemaDetailsObj);
             if (utilitySchemaDetailsObj[0].ltpStatus == true) {
                 await fullyAutomateLoadStokesInterval();
-                console.log('interval running at ' , new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
+                console.log('interval running at ', new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
             } else {
                 clearInterval(intervalStopper);
                 console.log('interval cleared at ', new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
@@ -267,6 +270,35 @@ const stopFullyAutomateLTP = async (req, res) => {
 }
 
 
+//minute hour day month weekDay //45 8 * * 1-5 // 
+cronJob.schedule('5 9 * * 1-5', () => {
+    let req = {};
+    let res = { status: () => { return { json: () => { } } }, json: () => { } };
+    fullyAutomateLTP(req, res);
+    console.log("Cron Job Started at intraday stats", new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
+}, {
+    timezone: 'Asia/Kolkata'
+});
+
+cronJob.schedule('25 9 * * 1-5', () => {
+    let req = {};
+    let res = { status: () => { return { json: () => { } } }, json: () => { } };
+    stopFullyAutomateLTP(req, res);
+    console.log("Cron Job stopped at intraday stats", new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
+}, {
+    timezone: 'Asia/Kolkata'
+});
+
+
+
 module.exports = {
-    insertRawStokes, insertIntradayStokes, fetchIntradayStokes, rawStokesFilter, fullyAutomateFetchIntradayStokes, fullyAutomateLoadStokes, fullyAutomateLTP, stopFullyAutomateLTP, fullyAutomateLoadStokesInterval
+    insertRawStokes,
+    insertIntradayStokes,
+    fetchIntradayStokes,
+    rawStokesFilter,
+    fullyAutomateFetchIntradayStokes,
+    fullyAutomateLoadStokes,
+    fullyAutomateLTP,
+    stopFullyAutomateLTP,
+    fullyAutomateLoadStokesInterval,
 };

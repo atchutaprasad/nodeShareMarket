@@ -1,49 +1,41 @@
 var axios = require('../axiosInterceptor');
-const mongoose = require('mongoose');
-let AutoLogin = require('../scema/loginDetails.model');
+const cronJob = require('node-cron');
 const parameters = require('../parameters.js');
-let { Intraday } = require('../scema/intradayStoke.model');
+let { Intraday, LuckyIntraday } = require('../scema/intradayStoke.model');
 let intradayController = require('./intraday.controller');
+const { json } = require('body-parser');
 
 
-const sleep = (ms) => {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 
 const getHistory = async (req, res) => {
     try {
         await intradayController.fullyAutomateLoadStokesInterval();
-        const fromDate = req.query?.fromDate || req.body?.fromDate;
-        const toDate = req.query?.toDate || req.body?.toDate;
+        const fromDate = req?.query?.fromDate || req?.body?.fromDate;
+        const toDate = req?.query?.toDate || req?.body?.toDate;
         let fromDateString = '';
         let toDateString = '';
         if (!fromDate && !toDate) {
-            let d;
-            d = new Date();
-            d.setDate(d.getDate() - 1); // Get data from 1 days ago
-            const yyyy = d.getFullYear();
-            const mm = String(d.getMonth() + 1).padStart(2, '0');
-            const dd = String(d.getDate()).padStart(2, '0');
-            fromDateString = `${yyyy}-${mm}-${dd}`;
-            toDateString = `${yyyy}-${mm}-${dd}`;
+            fromDateString = getLastWorkingDay();
+            toDateString = getLastWorkingDay();;
         } else {
-            console.log('Date received for history fetch: ' + fromDate);
             fromDateString = fromDate.trim();
             toDateString = toDate.trim();
         }
         console.log('Fetching history for date:', fromDateString, ' to ', toDateString);
         //dateString = dateString.trim();
         // Use AutoLogin to fetch saved jwt token
-        
+
 
 
         const intradayRecords = await Intraday.find({});
         //let tokens = intradayRecords.map(item => item.token.toString());
         console.log('Intraday Records Count:', intradayRecords.length);
+       // console.log('Intraday Records Count:', intradayRecords[0]);
         //let rd = intradayRecords.slice(1, 4); // Create a shallow copy of the array
         intradayRecords.forEach(async (item, index, array) => {
             setTimeout(async () => {
+                let validItemToLuckyRecord = false;
                 const requestBody = {
                     "exchange": "NSE",
                     "symboltoken": item.token.toString(),
@@ -74,9 +66,15 @@ const getHistory = async (req, res) => {
                                 const change = ((close - open) / open) * 100;
                                 // historyd.push(change.toFixed(2));
                                 historyPercentChanges.push(change.toFixed(2));
+
+                                if ((candleIndex === candleArray.length - 1) && (change > 10 || change < -10)) {
+                                    console.log(`Latest Daily change for ${item.name} (${item.token}) on ${candle[0]}: ${change.toFixed(2)}%`);
+                                    validItemToLuckyRecord = true;
+                                }
                             }
                         }
                     });
+
                     historyd.push(historyPercentChanges.join(', '));
                     let isIncreasing = true;
                     let isDecreasing = true;
@@ -90,13 +88,16 @@ const getHistory = async (req, res) => {
                         }
                     }
                     if (isIncreasing) {
-                      //  console.log('Overall Trend Increasing for token', item.name, response?.data?.data);
-                        historyd.push('Volume: Increasing');
+                        //  console.log('Overall Trend Increasing for token', item.name, response?.data?.data);
+                        historyd.push('Increasing');
+                        // validItemToLuckyRecord = true;
+
                     } else if (isDecreasing) {
-                     //   console.log('Overall Trend Decreasing for token', item.name, response?.data?.data);
-                        historyd.push('Volume: Decreasing');
+                        //   console.log('Overall Trend Decreasing for token', item.name, response?.data?.data);
+                        historyd.push('Decreasing');
+                        // validItemToLuckyRecord = true;
                     } else {
-                        historyd.push('Volume: Mixed');
+                        historyd.push('Mixed');
                     }
 
                     historyd.push(response?.data?.data);
@@ -115,30 +116,68 @@ const getHistory = async (req, res) => {
                     { new: true, runValidators: false }
                 );
 
+                let identifyLuckyRecord = await LuckyIntraday.findOne({ token: item.token });
+                if (identifyLuckyRecord) {
+                    await LuckyIntraday.deleteOne({ token: item.token });
+                }
+               // console.log('identifyLuckyRecord found - ', item);
+                if (validItemToLuckyRecord === true) {
+                    identifyLuckyRecord = new LuckyIntraday({
+                        Exchange: item.Exchange,
+                        name: item.name,
+                        Multiplier: item.Multiplier,
+                        token: item.token,
+                        symbol: item.symbol,
+                        volume: item.volume,
+                        ltp: item.ltp,
+                        ltpTime: item.ltpTime,
+                        openTime: item.openTime,
+                        open: item.open,
+                        high: item.high,
+                        low: item.low,
+                        close: item.close,
+                        percentChange: item.percentChange,
+                        buyPrice: item.buyPrice,
+                        sellPrice: item.sellPrice,
+                        orderId: item.orderId,
+                        history: historyd
+                    });
+                    await identifyLuckyRecord.save();
+                }
+
+
                 if (index === array.length - 1) {
                     console.log(`Completed fetching history for all tokens.`);
                     //calculateIntradayStats();
                 }
 
                 //await sleep(1000); // 1 second delay between requests
-            }, index * 500); // 3 requests per second
+            }, index * 400); // 3 requests per second
         });
 
         const intradayResults = await Intraday.find({});
-        console.log('intradayResults - ' + intradayResults.length)
         res.json(intradayResults);
-        //res.json({ status: true, data: [] });
 
 
     } catch (error) {
         //console.error('Error fetching history:', error.message || error);
-        res.status(500).json({ status: false, message: error.message || JSON.stringify(error) });
+
+        res.json({ status: false, message: error.message || JSON.stringify(error) });
+
+
     }
 }
+
 
 const calculateIntradayStats = async () => {
     try {
         const intradayRecords = await Intraday.find({});
+
+
+
+        const stoke = await Intraday.findOne({ token: ltpItem.symbolToken });
+
+
         for (const item of intradayRecords) {
             if (item.history && item.history.length > 0) {
 
@@ -168,6 +207,53 @@ const calculateIntradayStats = async () => {
         console.error('Error calculating intraday stats:', error.message || error);
     }
 };
+
+const getLastWorkingDay = () => {
+    let date = new Date();
+    // Create a new date object to avoid modifying the original date parameter
+    let workday = new Date(date.getTime());
+    let dayOfWeek = workday.getDay();
+
+    let daysToSubtract = 1; // Start by checking yesterday
+
+    // If today is Sunday (0), subtract 2 days to get Friday
+    if (dayOfWeek === 0) {
+        daysToSubtract = 2;
+    }
+    // If today is Monday (1), subtract 3 days to get last Friday
+    else if (dayOfWeek === 1) {
+        daysToSubtract = 3;
+    }
+
+    // Subtract the calculated number of days. The setDate method automatically
+    // handles month and year transitions.
+    workday.setDate(workday.getDate() - daysToSubtract);
+
+    // If the resulting day is still a weekend (e.g., if there are holidays involved, though this
+    // simple function doesn't account for them), this loop ensures it finds a weekday.
+    while (workday.getDay() === 0 || workday.getDay() === 6) {
+        workday.setDate(workday.getDate() - 1);
+    }
+
+    const yyyy = workday.getFullYear();
+    const mm = String(workday.getMonth() + 1).padStart(2, '0');
+    const dd = String(workday.getDate()).padStart(2, '0');
+
+
+    return `${yyyy}-${mm}-${dd}`;
+}
+
+
+//minute hour day month weekDay //40 8 * * 1-5
+cronJob.schedule('40 8 * * 1-5', () => {
+    let req = {};
+    let res = { status: () => { return { json: () => { } } }, json: () => { } };
+    getHistory(req, res);
+    console.log("Cron Job Started at Lucky controller ", new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
+}, {
+    timezone: 'Asia/Kolkata'
+});
+
 
 module.exports = {
     getHistory
@@ -291,3 +377,58 @@ module.exports = {
 
 // return the raw response data (status and data)
 // res.json({ status: true, message: 'History fetch initiated for intraday stocks. Check logs for details.' });
+
+
+/**
+ * 
+ * function calculateEMA(closingPrices, period) {
+    const k = 2 / (period + 1);
+    // The first EMA is typically the SMA of the first 'period' closing prices
+    let ema = closingPrices.slice(0, period).reduce((acc, price) => acc + price, 0) / period;
+
+    // Start iterating from the (period)-th element
+    for (let i = period; i < closingPrices.length; i++) {
+        ema = (closingPrices[i] * k) + (ema * (1 - k));
+    }
+    return ema;
+}
+
+// Example usage (replace with data fetched from SmartAPI)
+const closingPrices = [100, 101, 102, 105, 103, 106, 108, 107, 109, 110, 112, 115, 114, 116];
+const ema14 = calculateEMA(closingPrices, 14);
+console.log(ema14);
+
+
+function calculateRSI(closingPrices, period = 14) {
+    let gains = [];
+    let losses = [];
+
+    // Calculate initial gains and losses
+    for (let i = 1; i < closingPrices.length; i++) {
+        const difference = closingPrices[i] - closingPrices[i - 1];
+        gains.push(Math.max(0, difference));
+        losses.push(Math.max(0, -difference));
+    }
+
+    // Calculate initial average gain and average loss (SMA for the first 'period' values)
+    let avgGain = gains.slice(0, period).reduce((acc, val) => acc + val, 0) / period;
+    let avgLoss = losses.slice(0, period).reduce((acc, val) => acc + val, 0) / period;
+
+    // Calculate subsequent averages and RSI
+    for (let i = period; i < gains.length; i++) {
+        // Smoothed average calculation
+        avgGain = ((avgGain * (period - 1)) + gains[i]) / period;
+        avgLoss = ((avgLoss * (period - 1)) + losses[i]) / period;
+    }
+
+    const rs = avgGain / avgLoss;
+    const rsi = 100 - (100 / (1 + rs));
+    return rsi;
+}
+
+// Example usage (replace with data fetched from SmartAPI)
+const pricesForRSI = [100, 101, 102, 105, 103, 106, 108, 107, 109, 110, 112, 115, 114, 116, 118];
+const rsi14 = calculateRSI(pricesForRSI, 14);
+console.log(rsi14);
+
+ */

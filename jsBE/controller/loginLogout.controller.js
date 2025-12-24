@@ -66,11 +66,9 @@ const fullyAutomateLogin = async (req, res) => {
       });
       await Intraday.insertMany(intradayStokes);
       let rawConfig = parameters.loadRawStokesParams();
-      console.log('intradayConfig - ' , intradayConfig);
       const rawStokeAPI = await axios(rawConfig);
       const rawStokesfilteredData = await intradayController.rawStokesFilter(rawStokeAPI.data);
       console.log('rawStokesfilteredData - ' , rawStokesfilteredData.length);
-      console.log('intradayConfig - ' , intradayConfig);
       await RawStokes.deleteMany({});
       const RawStokesStokes = rawStokesfilteredData.map(item => new RawStokes(item));
       await RawStokes.insertMany(RawStokesStokes);

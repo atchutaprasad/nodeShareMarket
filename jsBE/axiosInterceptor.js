@@ -5,6 +5,9 @@ const AutoLogin = require('./scema/loginDetails.model');
 //const parameters = require('./parameters');
 
 const DEFAULT_HEADERS = {
+    'Cache-Control': 'no-cache',
+    'Pragma': 'no-cache',
+    'Expires': '0',
     'Content-Type': 'application/json',
     'Accept': 'application/json',
     'X-UserType': process.env.X_USER_TYPE || 'USER',
@@ -19,6 +22,10 @@ const DEFAULT_HEADERS = {
 axiosInstance.interceptors.request.use(async (config) => {
     console.log('Axios Interceptor Invoked with config:', config.url || 'no url');
     try {
+        
+        if(DEFAULT_HEADERS.Authorization){
+            delete DEFAULT_HEADERS.Authorization;
+        }
         config.headers = DEFAULT_HEADERS;//Object.assign({}, DEFAULT_HEADERS, config.headers || {});
         
         const loginDetailsObj = await AutoLogin.findOne({});
@@ -27,6 +34,7 @@ axiosInstance.interceptors.request.use(async (config) => {
 
         if (loginDetailsObj && loginDetailsObj.session && loginDetailsObj.session.data && loginDetailsObj.session.data.jwtToken) {
             config.headers['Authorization'] = 'Bearer ' + loginDetailsObj.session.data.jwtToken;
+            //console.log('Authorization header set in interceptor');
         }
         //console.log('Axios Interceptor Invoked with config:', config.headers);
     } catch (err) {
@@ -95,7 +103,7 @@ axiosInstance.interceptors.response.use((response) => {
     } catch (ex) {
         console.error('Token refresh failed:', ex && ex.message ? ex.message : ex);
         refreshMetrics.failure += 1;
-        try { await AutoLogin.deleteMany({}); } catch (e) { /* ignore */ }
+        //try { await AutoLogin.deleteMany({}); } catch (e) { /* ignore */ }
     }
     return Promise.reject(error);
 });

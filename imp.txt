@@ -51,6 +51,8 @@ Start the app:
 
 stop the app:
   pm2 list
+  pm2 stop all
+  pm2 delete all
   pm2 stop server or pm2 stop <id>
 
 Restart the app :
@@ -71,6 +73,25 @@ File sizes check:
 
 
 
+certificate for HTTPS:
+1 - sudo nano /etc/nginx/sites-available/default
+2 - sudo nginx -t
+3 - sudo systemctl reload nginx
+4 - certbot --nginx -d cinema143.com -d www.cinema143.com
+    Saving debug log to /var/log/letsencrypt/letsencrypt.log
+    Requesting a certificate for cinema143.com and www.cinema143.com
+
+    Successfully received certificate.
+    Certificate is saved at: /etc/letsencrypt/live/cinema143.com/fullchain.pem
+    Key is saved at:         /etc/letsencrypt/live/cinema143.com/privkey.pem
+    This certificate expires on 2026-03-24.
+    These files will be updated when the certificate renews.
+    Certbot has set up a scheduled task to automatically renew this certificate in the background.
+
+    Deploying certificate
+    Successfully deployed certificate for cinema143.com to /etc/nginx/sites-enabled/default
+    Successfully deployed certificate for www.cinema143.com to /etc/nginx/sites-enabled/default
+    Congratulations! You have successfully enabled HTTPS on https://cinema143.com and https://www.cinema143.com
 
 
 

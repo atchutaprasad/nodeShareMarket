@@ -28,6 +28,9 @@ const IntradaySchema = new mongoose.Schema(
         ltp:{
             type: Array
         },
+        ltpPercentage:{
+            type: Array
+        },
         ltpTime:{
             type: Array
         },
@@ -66,4 +69,5 @@ const IntradaySchema = new mongoose.Schema(
 const dynamicCollectionName = "Intradays";//+(new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })).split(',')[0];
 
 const Intraday = mongoose.model(dynamicCollectionName, IntradaySchema);
-module.exports = {Intraday};
+const LuckyIntraday = mongoose.model("LuckyIntradays", IntradaySchema);
+module.exports = {Intraday, LuckyIntraday};

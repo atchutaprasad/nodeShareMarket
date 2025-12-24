@@ -1,10 +1,10 @@
 
 var loginParams = (totp) => {
     var data = JSON.stringify({
-        "clientcode": process.env.ANGEL_CLIENT_CODE,
-        "password": process.env.ANGEL_PASSWORD,
+        "clientcode": process.env.ANGEL_CLIENT_CODE || 'V112910',
+        "password": process.env.ANGEL_PASSWORD || '1984',
         "totp": totp,
-        "state": 'live' + new Date().getTime()
+        "state": 'live-' + new Date().getTime()
     });
     //console.log('loginParams data - ', data);
     var config = {
