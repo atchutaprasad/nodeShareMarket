@@ -127,6 +127,7 @@ var checkSession = () => {
             $('#updates').show();
             $('#generateSession').hide();
             fullyAutomateLoadStokes();
+            fullyAutomateSelectedStokes();
         }
         else {
             $('#updates').hide();
@@ -134,6 +135,10 @@ var checkSession = () => {
             alert(res.realMessage);
         }
     });
+}
+
+var alterIcons = () => {
+    $('.alterIcons').toggle();
 }
 
 

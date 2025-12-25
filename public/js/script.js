@@ -5,7 +5,9 @@ var constants = {
     intradayDetailsLoaded :false,
     intradayStokesLoaded: false,
     stokesList: [],
-    stokesListIsAscending: true
+    selectedStokesList: [],
+    stokesListIsAscending: true,
+    selectedStokesListIsAscending: true,
 }
 var ajaxPOSTCall = (api, postData, callback) => {
     $('.preloader-container').show();

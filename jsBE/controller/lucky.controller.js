@@ -31,7 +31,7 @@ const getHistory = async (req, res) => {
         const intradayRecords = await Intraday.find({});
         //let tokens = intradayRecords.map(item => item.token.toString());
         console.log('Intraday Records Count:', intradayRecords.length);
-       // console.log('Intraday Records Count:', intradayRecords[0]);
+        // console.log('Intraday Records Count:', intradayRecords[0]);
         //let rd = intradayRecords.slice(1, 4); // Create a shallow copy of the array
         intradayRecords.forEach(async (item, index, array) => {
             setTimeout(async () => {
@@ -118,11 +118,17 @@ const getHistory = async (req, res) => {
 
                 let identifyLuckyRecord = await LuckyIntraday.findOne({ token: item.token });
                 if (identifyLuckyRecord) {
-                    await LuckyIntraday.deleteOne({ token: item.token });
-                }
-               // console.log('identifyLuckyRecord found - ', item);
-                if (validItemToLuckyRecord === true) {
-                    identifyLuckyRecord = new LuckyIntraday({
+                    //await LuckyIntraday.deleteOne({ token: item.token });
+                    await LuckyIntraday.findOneAndUpdate(
+                        { token: item.token },
+                        {
+                             $set: { history: historyd }, // Clear existing history
+                        },
+                        { new: true, runValidators: false }
+                    );
+
+                } else if(validItemToLuckyRecord === true){
+                    const newLuckyIntradayStoke  = new LuckyIntraday({
                         Exchange: item.Exchange,
                         name: item.name,
                         Multiplier: item.Multiplier,
@@ -142,8 +148,9 @@ const getHistory = async (req, res) => {
                         orderId: item.orderId,
                         history: historyd
                     });
-                    await identifyLuckyRecord.save();
+                    await newLuckyIntradayStoke.save();
                 }
+                
 
 
                 if (index === array.length - 1) {

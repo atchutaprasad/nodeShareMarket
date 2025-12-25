@@ -5,7 +5,7 @@ const cronJob = require('node-cron');
 //let { SmartAPI, WebSocket, WebSocketV2 } = require('smartapi-javascript');
 const parameters = require('../parameters.js');
 let RawStokes = require('../scema/rawStoke.model');
-let { Intraday } = require('../scema/intradayStoke.model');
+let { Intraday, LuckyIntraday } = require('../scema/intradayStoke.model');
 //let AutoLogin = require('../scema/loginDetails.model');
 let UtilitySchema = require('../scema/utility.model');
 //let loginLogoutController = require('./loginLogout.controller');
@@ -141,6 +141,11 @@ const fullyAutomateLoadStokes = async (req, res) => {
     res.json(insertedRecords);
 }
 
+const fullyAutomateSelectedStokes = async (req, res) => {
+    const insertedRecords = await LuckyIntraday.find({});
+    res.json(insertedRecords);
+}
+
 const rotateLTPRequests = async (config) => {
     await axios(config).then(async (response) => {
         //console.log('LTP response received with ', response);
@@ -161,35 +166,108 @@ const rotateLTPRequests = async (config) => {
 
                 const stoke = await Intraday.findOne({ token: ltpItem.symbolToken });
                 //console.log(stoke)
-                if (stoke.ltp && stoke.ltp.length > 1 && stoke.ltp.at(-1) !== ltpItem.ltp) {
-                    updateObj.ltp = ltpItem.ltp;
-                    updateObj.ltpTime = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
-                    updateObj.ltpPercentage = ((ltpItem.ltp - ltpItem.open) / ltpItem.open) * 100; //ltpItem.ltpPercentage;
-                }
-                if (stoke.open && stoke.open.length > 1 && stoke.open.at(-1) !== ltpItem.open) {
-                    updateObj.open = ltpItem.open;
-                    updateObj.openTime = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
-                }
 
-
+                let updateDBRecords = false;
+                let ltpPercentage = ((ltpItem.ltp - ltpItem.open) / ltpItem.open) * 100;
                 if (stoke.ltp && stoke.ltp.length < 2) {
                     updateObj.ltp = ltpItem.ltp;
                     updateObj.ltpTime = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
                     updateObj.ltpPercentage = ((ltpItem.ltp - ltpItem.open) / ltpItem.open) * 100; //ltpItem.ltpPercentage;
+                    updateDBRecords = true;
                 }
                 if (stoke.open && stoke.open.length < 2) {
                     updateObj.open = ltpItem.open;
-                    updateObj.openTime = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+                    updateObj.openTime = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+                    updateDBRecords = true;
                 }
+
+
+                if (stoke.ltp && stoke.ltp.length > 1 && stoke.ltp.at(-1) !== ltpItem.ltp) {
+                    updateObj.ltp = ltpItem.ltp;
+                    updateObj.ltpTime = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+                    updateObj.ltpPercentage = ((ltpItem.ltp - ltpItem.open) / ltpItem.open) * 100; //ltpItem.ltpPercentage;
+                    updateDBRecords = true;
+                }
+                if (stoke.open && stoke.open.length > 1 && stoke.open.at(-1) !== ltpItem.open) {
+                    updateObj.open = ltpItem.open;
+                    updateObj.openTime = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+                    updateDBRecords = true;
+                }
+
+                if (updateDBRecords === true) {//updateDBRecords
+                    //console.log('Updating stoke ', ltpItem.symbolToken, ' with LTP ', ltpItem.ltp, ' and Open ', ltpItem.open);
+                    await Intraday.findOneAndUpdate(
+                        { token: ltpItem.symbolToken },
+                        {
+                            $set: { percentChange: ltpItem.percentChange }, $push: updateObj
+                        },
+                        { new: true, runValidators: false }
+                    );
+                    const LuckyIntradayStoke = await LuckyIntraday.findOne({ token: ltpItem.symbolToken });
+                    if (LuckyIntradayStoke) {
+                        await LuckyIntraday.findOneAndUpdate(
+                            { token: ltpItem.symbolToken },
+                            {
+                                $set: { percentChange: ltpItem.percentChange }, $push: updateObj
+                            },
+                            { new: true, runValidators: false }
+                        );
+                    } else if (ltpPercentage && (ltpPercentage >= 7 || ltpPercentage <= -7) && (ltpItem.open > 0 && ltpItem.ltp > 0)) { // adding new stoke if percent change is more than 2%
+                        console.log('Adding new lucky stoke with percent change of ', ltpPercentage);
+                        let stokeLTP = stoke.ltp ? [...stoke.ltp] : [];
+                        let stokeOpen = stoke.open ? [...stoke.open] : [];
+                        let stokeLtpTime = stoke.ltpTime ? [...stoke.ltpTime] : [];
+                        let stokeOpenTime = stoke.openTime ? [...stoke.openTime] : [];
+                        let stokeLTPPercentage = stoke.ltpPercentage ? [...stoke.ltpPercentage] : [];
+                        
+                        if(updateObj.ltpPercentage){
+                            stokeLTPPercentage.push(updateObj.ltpPercentage);
+                        }
+                        if(updateObj.ltp){
+                            stokeLTP.push(updateObj.ltp);
+                        }
+                        if(updateObj.open){
+                            stokeOpen.push(updateObj.open);
+                        }
+                        if(updateObj.ltpTime){
+                            stokeLtpTime.push(updateObj.ltpTime);
+                        }
+                        if(updateObj.openTime){
+                            stokeOpenTime.push(updateObj.openTime);
+                        }
+
+                        const newLuckyIntradayStoke = new LuckyIntraday({
+                            Exchange: stoke.Exchange,
+                            name: stoke.name,
+                            Multiplier: stoke.Multiplier,
+                            token: stoke.token,
+                            symbol: stoke.symbol,
+                            volume: stoke.volume,
+                            ltp: stokeLTP,
+                            ltpTime: stokeLtpTime,
+                            openTime: stokeOpenTime,
+                            open: stokeOpen,
+                            high: stoke.high,
+                            ltpPercentage: stokeLTPPercentage,
+                            low: stoke.low,
+                            close: stoke.close,
+                            percentChange: stoke.percentChange,
+                            buyPrice: stoke.buyPrice,
+                            sellPrice: stoke.sellPrice,
+                            orderId: stoke.orderId,
+                            history: stoke.history,
+                        });
+                        await newLuckyIntradayStoke.save();
+                    }
+
+                }
+
                 //console.log(updateObj)
 
-                await Intraday.findOneAndUpdate(
-                    { token: ltpItem.symbolToken },
-                    {
-                        $set: { percentChange: ltpItem.percentChange }, $push: updateObj
-                    },
-                    { new: true, runValidators: false }
-                );
+
+
+
+
             });
 
         } catch (error) {
@@ -301,4 +379,5 @@ module.exports = {
     fullyAutomateLTP,
     stopFullyAutomateLTP,
     fullyAutomateLoadStokesInterval,
+    fullyAutomateSelectedStokes,
 };

@@ -12,7 +12,7 @@ module.exports = function basicAuth(req, res, next) {
   const auth = req.headers['authorization'];
   if (!auth || !auth.startsWith('Basic ')) {
     res.set('WWW-Authenticate', 'Basic realm="Admin Area"');
-    return res.status(401).send('Authentication required.');
+    return res.status(401).send('Authentication required. Contact site admin at india2010@gmail.com');
   }
   const b64 = auth.slice(6);
   let creds;
@@ -20,12 +20,12 @@ module.exports = function basicAuth(req, res, next) {
     creds = Buffer.from(b64, 'base64').toString('utf8');
   } catch (e) {
     res.set('WWW-Authenticate', 'Basic realm="Admin Area"');
-    return res.status(401).send('Invalid authentication token.');
+    return res.status(401).send('Invalid authentication token. Contact site admin at india2010@gmail.com');
   }
   const idx = creds.indexOf(':');
   if (idx < 0) {
     res.set('WWW-Authenticate', 'Basic realm="Admin Area"');
-    return res.status(401).send('Invalid authentication token.');
+    return res.status(401).send('Invalid authentication token. Contact site admin at india2010@gmail.com');
   }
   const user = creds.slice(0, idx);
   const pass = creds.slice(idx + 1);
@@ -35,5 +35,5 @@ module.exports = function basicAuth(req, res, next) {
     return next();
   }
   res.set('WWW-Authenticate', 'Basic realm="Admin Area"');
-  return res.status(401).send('Authentication failed.');
+  return res.status(401).send('Authentication failed., contact site admin at india2010@gmail.com');
 };

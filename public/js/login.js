@@ -35,6 +35,10 @@ var fullyAutomateLoadStokes = () => {
     ajaxGETCall('/api/intraday/fullyAutomateLoadStokes', fullyAutomateLoginCallback);
 }
 
+var fullyAutomateSelectedStokes = () => {
+    ajaxGETCall('/api/intraday/fullyAutomateSelectedStokes', fullyAutomateSelectedStokesCallback);
+}
+
 var fullyAutomateLTP = () => {
     ajaxGETCall('/api/intraday/fullyAutomateLTP', (function () { console.log('fully automate LTP') }));
 }
@@ -45,9 +49,30 @@ var stopFullyAutomateLTP = () => {
 
 
 var getHistory = () => {
-    ajaxGETCall('/api/lucky/history?fromDate=' + $('#fromDate').val() + '&toDate=' + $('#toDate').val(), fullyAutomateLoginCallback); 
+    ajaxGETCall('/api/lucky/history?fromDate=' + $('#fromDate').val() + '&toDate=' + $('#toDate').val(), fullyAutomateLoginCallback);
 }
 
+var fullyAutomateSelectedStokesCallback = (res) => {
+    if (res && res.length) {
+        constants.selectedStokesList = res;
+        var html = '';
+        $.each(res, function (index, obj) {
+            html += `<tr><td>${index}</td>
+                    <td>${obj.name}</td>
+                    <td>${htmlReturn(obj, obj.open, obj.openTime)}</td>
+                    <td><div>${htmlReturn(obj, obj.ltp, obj.ltpTime, obj.ltpPercentage)}</div></td>
+                    <td>${obj.history[0] ? obj.history[0] : ''}</td>
+                    <td>${obj.history[1] ? obj.history[1] : ''}</td>
+                    <td>${obj.percentChange ? obj.percentChange + '%' : ''}</td>
+                    </tr>`;
+        });
+        html += '';
+        document.getElementById("fullyAutoMateSelectedStokes").innerHTML = html;
+        document.getElementById("stokeSelectedCount").innerHTML = constants.selectedStokesList.length;
+    } else {
+        alert('zero selected stokes found');
+    }
+}
 var fullyAutomateLoginCallback = (res) => {
     if (res && res.length) {
         constants.stokesList = res;
@@ -56,26 +81,27 @@ var fullyAutomateLoginCallback = (res) => {
         localStorage.setItem('setAutoLogin', 'true');
         var html = '';
         let response = res;
-        var percentChange = response.map(item => item.open).join(',').split(',').map(Number)
-        var percentChangeResult = percentChange.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
-        var x = 0;
+        // var percentChange = response.map(item => item.open).join(',').split(',').map(Number)
+        // var percentChangeResult = percentChange.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+       // var x = 0;
         $.each(res, function (index, obj) {
-            x += parseFloat(obj.percentChange);
+         //   x += parseFloat(obj.percentChange);
             html += `<tr><td>${index}</td>
                     <td>${obj.name}</td>
                     <td>${htmlReturn(obj, obj.open, obj.openTime)}</td>
                     <td><div>${htmlReturn(obj, obj.ltp, obj.ltpTime, obj.ltpPercentage)}</div></td>
                     <td>${obj.history[0] ? obj.history[0] : ''}</td>
                     <td>${obj.history[1] ? obj.history[1] : ''}</td>
-                    <td>${obj.percentChange ? obj.percentChange.toFixed(2) + '%' : ''}</td>
+                    <td>${obj.percentChange ? obj.percentChange + '%' : ''}</td>
                     </tr>`;
         });
         html += '';
         document.getElementById("fullyAutoMateStokes").innerHTML = html;
+        document.getElementById("stokeIntradayCount").innerHTML = constants.stokesList.length;
         // debugger
-        document.getElementById("percentChangeResult").innerHTML = percentChangeResult + '%';
+        // document.getElementById("percentChangeResult").innerHTML = percentChangeResult + '%';
     } else {
-        alert('login failed  - intraday stokes not found');
+        alert('Intraday stokes not found');
         $('#updates').hide();
         $('#generateSession').show();
         localStorage.setItem('setAutoLogin', 'false');
@@ -92,51 +118,46 @@ var htmlReturn = (obj, arrayElements, timer, ltpPercentage) => {
     return html;
 }
 
-var sortTable = (column) => {
+var sortTable = (tablename, column, stokeList, isAscending) => {
+
     var stokes = []
     if (column === "name") {
-        if (constants.stokesListIsAscending) {
-            constants.stokesListIsAscending = false;
-            stokes = constants.stokesList.sort((a, b) => a.name.localeCompare(b.name));
+        if (isAscending) {
+            stokes = stokeList.sort((a, b) => a.name.localeCompare(b.name));
         } else {
-            constants.stokesListIsAscending = true;
-            stokes = constants.stokesList.sort((a, b) => b.name.localeCompare(a.name));
+            stokes = stokeList.sort((a, b) => b.name.localeCompare(a.name));
         }
     } else if (column === "history") {
-        if (constants.stokesListIsAscending) {
-            constants.stokesListIsAscending = false;
-          //  console.log('column - ' + column);
-            stokes = constants.stokesList.sort((a, b) => (b.history[0].split(',')).at(-1) - (a.history[0].split(',')).at(-1));
+        if (isAscending) {
+            stokes = stokeList.sort((a, b) => (b.history[0].split(',')).at(-1) - (a.history[0].split(',')).at(-1));
         } else {
-            constants.stokesListIsAscending = true;
-            stokes = constants.stokesList.sort((a, b) => (a.history[0].split(',')).at(-1) - (b.history[0].split(',')).at(-1));
+            stokes = stokeList.sort((a, b) => (a.history[0].split(',')).at(-1) - (b.history[0].split(',')).at(-1));
         }
     } else if (column === "volume") {
-        if (constants.stokesListIsAscending) {
-            constants.stokesListIsAscending = false;
-            //console.log('column - ' + column);
-            stokes = constants.stokesList.sort((a, b) => {
-              //  console.log('a.history[1] - ' + a.history[1]);
-             //   console.log('b.history[1] - ' + b.history[1]);
-
+        if (isAscending) {
+            stokes = stokeList.sort((a, b) => {
                 return a.history[1] && b.history[1] ? (b.history[1]).localeCompare(a.history[1]) : 0;
             });
         } else {
-            constants.stokesListIsAscending = true;
-            stokes = constants.stokesList.sort((a, b) => {
+            stokes = stokeList.sort((a, b) => {
                 return a.history[1] && b.history[1] ? (a.history[1]).localeCompare(b.history[1]) : 0;
             });
         }
     } else {
-        if (constants.stokesListIsAscending) {
-            constants.stokesListIsAscending = false;
-            stokes = constants.stokesList.sort((a, b) => b[column] - a[column]);
+        if (isAscending) {
+            stokes = stokeList.sort((a, b) => a[column] - b[column]);
         } else {
-            constants.stokesListIsAscending = true;
-            stokes = constants.stokesList.sort((a, b) => a[column] - b[column]);
+            stokes = stokeList.sort((a, b) => b[column] - a[column]);
         }
     }
-    fullyAutomateLoginCallback(stokes);
+    if (tablename === 'fullyAutoMateStokes') {
+        fullyAutomateLoginCallback(stokes);
+        constants.stokesListIsAscending = !constants.stokesListIsAscending;
+    } else {
+        constants.selectedStokesListIsAscending = !constants.selectedStokesListIsAscending;
+        fullyAutomateSelectedStokesCallback(stokes);
+    }
+
 }
 
 var generateSession = () => {

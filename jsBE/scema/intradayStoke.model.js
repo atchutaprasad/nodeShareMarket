@@ -17,7 +17,8 @@ const IntradaySchema = new mongoose.Schema(
             require: [true, 'multiplier is required']
         },
         token: {
-            type: String
+            type: String,
+            index: true 
         },
         symbol: {
             type: String

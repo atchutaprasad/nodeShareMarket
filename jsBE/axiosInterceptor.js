@@ -20,7 +20,7 @@ const DEFAULT_HEADERS = {
 
 // Request interceptor: attach default headers and Authorization (if available in DB)
 axiosInstance.interceptors.request.use(async (config) => {
-    console.log('Axios Interceptor Invoked with config:', config.url || 'no url');
+    //console.log('Axios Interceptor Invoked with config:', config.url || 'no url');
     try {
         
         if(DEFAULT_HEADERS.Authorization){

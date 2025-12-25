@@ -41,7 +41,7 @@ app.use("/api/admin", adminRoute);
 const luckyRoute = require("./jsBE/router/lucky.route");
 app.use("/api/lucky", luckyRoute);
 
-app.get("/", function (req, res) {
+app.get("/", basicAuth, function (req, res) {
    res.sendFile(__dirname + "/index.html");
 })
 

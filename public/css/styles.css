@@ -55,6 +55,14 @@
   overflow-y: auto;
  }
 
+ .accordion .accordion-button:focus {
+   box-shadow: none;
+ }
+
+
+ #updates, .alterIcons{
+  display: none;
+ }
  .dropdown-menu.show {
     z-index: 100000;
 }
@@ -82,6 +90,7 @@
   height: 50px;
   animation: spin 1s linear infinite; /* Applies the 'spin' animation */
 }
+
 
 @keyframes spin {
   0% { transform: rotate(0deg); }
