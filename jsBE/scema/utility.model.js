@@ -2,7 +2,9 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const UtilitySchema = new Schema({
-    ltpStatus: { type: Boolean, required: true }
+    ltpStatus: { type: Boolean},
+    utilitySchemaIdentifier: { type: Boolean, required: true },
+    luckyLtpStatus: { type: Boolean },
 });
 
 

@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const parameters = require('../parameters.js');
 let {Intraday} = require('../scema/intradayStoke.model');
 let autoLogin = require('../scema/loginDetails.model');
+let UtilitySchema = require('../scema/utility.model');
 let intradayController = require('./intraday.controller');
 let RawStokes = require('../scema/rawStoke.model');
 
@@ -69,6 +70,7 @@ const fullyAutomateLogin = async (req, res) => {
       const rawStokeAPI = await axios(rawConfig);
       const rawStokesfilteredData = await intradayController.rawStokesFilter(rawStokeAPI.data);
       console.log('rawStokesfilteredData - ' , rawStokesfilteredData.length);
+      await UtilitySchema.deleteMany({});
       await RawStokes.deleteMany({});
       const RawStokesStokes = rawStokesfilteredData.map(item => new RawStokes(item));
       await RawStokes.insertMany(RawStokesStokes);

@@ -168,33 +168,37 @@ const rotateLTPRequests = async (config) => {
                 //console.log(stoke)
 
                 let updateDBRecords = false;
-                let ltpPercentage = ((ltpItem.ltp - ltpItem.open) / ltpItem.open) * 100;
+                let ltpbasePrice = stoke.ltp[0] || 0// ltpItem.open > 0 ? ltpItem.open : (stoke.open && stoke.open.length > 0 ? stoke.open[0] : 0);
+                let ltpPercentage = stoke.ltp[0] ? ((ltpItem.ltp - ltpbasePrice) / ltpbasePrice) * 100 : 0;
+
+                let dateString = new Date();
+                //console.log(`${dateString.getHours()}:${dateString.getMinutes()}:${dateString.getSeconds()}`)
                 if (stoke.ltp && stoke.ltp.length < 2) {
                     updateObj.ltp = ltpItem.ltp;
-                    updateObj.ltpTime = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
-                    updateObj.ltpPercentage = ((ltpItem.ltp - ltpItem.open) / ltpItem.open) * 100; //ltpItem.ltpPercentage;
+                    updateObj.ltpTime = `${dateString.getHours()}:${dateString.getMinutes()}:${dateString.getSeconds()}`; //new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+                    updateObj.ltpPercentage = ltpPercentage.toFixed(2); //ltpItem.ltpPercentage;
                     updateDBRecords = true;
                 }
                 if (stoke.open && stoke.open.length < 2) {
                     updateObj.open = ltpItem.open;
-                    updateObj.openTime = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+                    updateObj.openTime = `${dateString.getHours()}:${dateString.getMinutes()}:${dateString.getSeconds()}`;
                     updateDBRecords = true;
                 }
 
 
                 if (stoke.ltp && stoke.ltp.length > 1 && stoke.ltp.at(-1) !== ltpItem.ltp) {
                     updateObj.ltp = ltpItem.ltp;
-                    updateObj.ltpTime = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
-                    updateObj.ltpPercentage = ((ltpItem.ltp - ltpItem.open) / ltpItem.open) * 100; //ltpItem.ltpPercentage;
+                    updateObj.ltpTime = `${dateString.getHours()}:${dateString.getMinutes()}:${dateString.getSeconds()}`;
+                    updateObj.ltpPercentage = ltpPercentage.toFixed(2); //ltpItem.ltpPercentage;
                     updateDBRecords = true;
                 }
                 if (stoke.open && stoke.open.length > 1 && stoke.open.at(-1) !== ltpItem.open) {
                     updateObj.open = ltpItem.open;
-                    updateObj.openTime = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+                    updateObj.openTime = `${dateString.getHours()}:${dateString.getMinutes()}:${dateString.getSeconds()}`;
                     updateDBRecords = true;
                 }
 
-                if (updateDBRecords === true) {//updateDBRecords
+                if (updateDBRecords === true) {
                     //console.log('Updating stoke ', ltpItem.symbolToken, ' with LTP ', ltpItem.ltp, ' and Open ', ltpItem.open);
                     await Intraday.findOneAndUpdate(
                         { token: ltpItem.symbolToken },
@@ -212,43 +216,45 @@ const rotateLTPRequests = async (config) => {
                             },
                             { new: true, runValidators: false }
                         );
-                    } else if (ltpPercentage && (ltpPercentage >= 7 || ltpPercentage <= -7) && (ltpItem.open > 0 && ltpItem.ltp > 0)) { // adding new stoke if percent change is more than 2%
-                        console.log('Adding new lucky stoke with percent change of ', ltpPercentage);
+                    } else if ((ltpPercentage >= 2 || ltpPercentage <= -2) && (ltpItem.open > 0 && ltpItem.ltp > 0)) { // adding new stoke if percent change is more than 2%
+                        console.log('Adding new lucky stoke with percent change of ', ltpPercentage.toFixed(2), '% for token ', ltpItem.symbolToken);
                         let stokeLTP = stoke.ltp ? [...stoke.ltp] : [];
                         let stokeOpen = stoke.open ? [...stoke.open] : [];
                         let stokeLtpTime = stoke.ltpTime ? [...stoke.ltpTime] : [];
                         let stokeOpenTime = stoke.openTime ? [...stoke.openTime] : [];
                         let stokeLTPPercentage = stoke.ltpPercentage ? [...stoke.ltpPercentage] : [];
-                        
-                        if(updateObj.ltpPercentage){
+
+                        if (updateObj.ltpPercentage) {
                             stokeLTPPercentage.push(updateObj.ltpPercentage);
                         }
-                        if(updateObj.ltp){
+                        if (updateObj.ltp) {
                             stokeLTP.push(updateObj.ltp);
                         }
-                        if(updateObj.open){
+                        if (updateObj.open) {
                             stokeOpen.push(updateObj.open);
                         }
-                        if(updateObj.ltpTime){
+                        if (updateObj.ltpTime) {
                             stokeLtpTime.push(updateObj.ltpTime);
                         }
-                        if(updateObj.openTime){
+                        if (updateObj.openTime) {
                             stokeOpenTime.push(updateObj.openTime);
                         }
-
+                        //console.log('stoke ', stokeLTP, stokeLTPPercentage, stokeOpen, stokeLtpTime, stokeOpenTime);
+                        // delete stoke._id;
                         const newLuckyIntradayStoke = new LuckyIntraday({
+                            //...stoke,
+                            ltp: stokeLTP,
+                            ltpTime: stokeLtpTime,
+                            openTime: stokeOpenTime,
+                            open: stokeOpen,
+                            ltpPercentage: stokeLTPPercentage,
                             Exchange: stoke.Exchange,
                             name: stoke.name,
                             Multiplier: stoke.Multiplier,
                             token: stoke.token,
                             symbol: stoke.symbol,
                             volume: stoke.volume,
-                            ltp: stokeLTP,
-                            ltpTime: stokeLtpTime,
-                            openTime: stokeOpenTime,
-                            open: stokeOpen,
                             high: stoke.high,
-                            ltpPercentage: stokeLTPPercentage,
                             low: stoke.low,
                             close: stoke.close,
                             percentChange: stoke.percentChange,
@@ -314,10 +320,27 @@ const fullyAutomateLoadStokesInterval = async () => {
 
 const fullyAutomateLTP = async (req, res) => {
     try {
+        // let dateNow = new Date();
+        // const time913AM = new Date(dateNow.getFullYear(), dateNow.getMonth(), dateNow.getDate(), 9, 13, 0, 0); // Year, Month (0-indexed), Day, Hour (9 for AM), Minute, Second, Millisecond
+        // const time330PM = new Date(dateNow.getFullYear(), dateNow.getMonth(), dateNow.getDate(), 15, 30, 0, 0); // Year, Month (0-indexed), Day, Hour (15 for PM), Minute, Second, Millisecond
+        // if (dateNow.getTime() >= time913AM.getTime() && dateNow.getTime() <= time330PM.getTime()) {
         await fullyAutomateLoadStokesInterval();
-        await UtilitySchema.deleteMany({});
-        const utilityltp = new UtilitySchema({ ltpStatus: true });
-        await utilityltp.save();
+
+
+        let utilitySchemaIdenity = await UtilitySchema.findOne({ utilitySchemaIdentifier: true });
+        if (utilitySchemaIdenity) {
+            await UtilitySchema.findOneAndUpdate(
+                { utilitySchemaIdentifier: true },
+                {
+                    $set: { ltpStatus: true }, // Clear existing history
+                },
+                { new: true, runValidators: false }
+            );
+        } else {
+            const utilitySchema = new UtilitySchema({ utilitySchemaIdentifier: true, ltpStatus: true, luckyLtpStatus: false });
+            await utilitySchema.save();
+        }
+
         intervalStopper = setInterval(async () => {
             let utilitySchemaDetailsObj = await UtilitySchema.find({});
             //console.log(utilitySchemaDetailsObj);
@@ -329,8 +352,15 @@ const fullyAutomateLTP = async (req, res) => {
                 console.log('interval cleared at ', new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
             }
         }, 15000);
+
+        res.json({ message: "Market is Open now. LTP fetching will start at 9:15 AM IST" });
+        // } else {
+        //     await fullyAutomateLoadStokesInterval();
+        //     res.json({ message: "Market is Closed now. LTP fetching will close at 3:30 PM IST" });
+        // }
+
         //await webSocketManyV2();
-        res.json({ message: "LTP data fetched successfully" });
+        //res.json({ message: "LTP data fetched successfully" });
     } catch (error) {
         res.json(error.message);
     }
@@ -338,9 +368,22 @@ const fullyAutomateLTP = async (req, res) => {
 
 const stopFullyAutomateLTP = async (req, res) => {
     try {
-        await UtilitySchema.deleteMany({});
-        const utilityltp = new UtilitySchema({ ltpStatus: false });
-        await utilityltp.save();
+        // await UtilitySchema.deleteMany({});
+        // const utilityltp = new UtilitySchema({ ltpStatus: false });
+        // await utilityltp.save();
+
+        let utilitySchemaIdenity = await UtilitySchema.findOne({ ltpStatus: true });
+        if (utilitySchemaIdenity) {
+            await UtilitySchema.findOneAndUpdate(
+                { ltpStatus: true },
+                {
+                    $set: { ltpStatus: false }, // Clear existing history
+                },
+                { new: true, runValidators: false }
+            );
+        }
+
+
         res.json({ message: "stop  ----  LTP data fetched successfully" });
     } catch (error) {
         res.json(error.message);
@@ -349,23 +392,32 @@ const stopFullyAutomateLTP = async (req, res) => {
 
 
 //minute hour day month weekDay //45 8 * * 1-5 // 
-cronJob.schedule('5 9 * * 1-5', () => {
+cronJob.schedule('15 9 * * 1-5', () => {
     let req = {};
     let res = { status: () => { return { json: () => { } } }, json: () => { } };
     fullyAutomateLTP(req, res);
-    console.log("Cron Job Started at intraday stats", new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
+    console.log("Cron Job Started at 9:15 AM", new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
 }, {
     timezone: 'Asia/Kolkata'
 });
 
-cronJob.schedule('25 9 * * 1-5', () => {
+cronJob.schedule('17 9 * * 1-5', () => {
     let req = {};
     let res = { status: () => { return { json: () => { } } }, json: () => { } };
     stopFullyAutomateLTP(req, res);
-    console.log("Cron Job stopped at intraday stats", new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
+    console.log("Cron Job stopped at 9:17AM", new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
 }, {
     timezone: 'Asia/Kolkata'
 });
+
+// cronJob.schedule('35 15 * * 1-5', () => {
+//     let req = {};
+//     let res = { status: () => { return { json: () => { } } }, json: () => { } };
+//     stopFullyAutomateLTP(req, res);
+//     console.log("Cron Job stopped at 3:35 PM", new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
+// }, {
+//     timezone: 'Asia/Kolkata'
+// });
 
 
 

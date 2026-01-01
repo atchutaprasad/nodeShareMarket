@@ -70,6 +70,18 @@ File sizes check:
   sudo find / -type f -size +50M -exec ls -lh {} \; | sort -k 5 -rh | head -20
 
 
+timezone setup:
+  1 - timedatectl list-timezones or cat /etc/timezone
+  2 - timedatectl ( to check timezone of server )
+  3 - sudo timedatectl set-timezone Asia/Kolkata ( change server timezone to Asia/Kolkata )
+
+to check VS code processors:
+  1 - ps aux | grep vscode-server | grep -v grep
+  2 - kill PID <check as above>
+
+to check node processors:
+  1 - ps aux | grep node | grep -v grep
+  2 - ps aux | grep node | grep -v grep | wc -l (number of instance)
 
 
 

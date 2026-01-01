@@ -59,8 +59,8 @@ var fullyAutomateSelectedStokesCallback = (res) => {
         $.each(res, function (index, obj) {
             html += `<tr><td>${index}</td>
                     <td>${obj.name}</td>
-                    <td>${htmlReturn(obj, obj.open, obj.openTime)}</td>
-                    <td><div>${htmlReturn(obj, obj.ltp, obj.ltpTime, obj.ltpPercentage)}</div></td>
+                    <td>${htmlReturn('open', obj, obj.open)}</td>
+                    <td><div>${htmlReturn('ltp', obj, obj.ltp)}</div></td>
                     <td>${obj.history[0] ? obj.history[0] : ''}</td>
                     <td>${obj.history[1] ? obj.history[1] : ''}</td>
                     <td>${obj.percentChange ? obj.percentChange + '%' : ''}</td>
@@ -88,8 +88,8 @@ var fullyAutomateLoginCallback = (res) => {
          //   x += parseFloat(obj.percentChange);
             html += `<tr><td>${index}</td>
                     <td>${obj.name}</td>
-                    <td>${htmlReturn(obj, obj.open, obj.openTime)}</td>
-                    <td><div>${htmlReturn(obj, obj.ltp, obj.ltpTime, obj.ltpPercentage)}</div></td>
+                    <td>${htmlReturn('open', obj, obj.open)}</td>
+                    <td><div>${htmlReturn('ltp', obj, obj.ltp)}</div></td>
                     <td>${obj.history[0] ? obj.history[0] : ''}</td>
                     <td>${obj.history[1] ? obj.history[1] : ''}</td>
                     <td>${obj.percentChange ? obj.percentChange + '%' : ''}</td>
@@ -108,12 +108,19 @@ var fullyAutomateLoginCallback = (res) => {
     }
 }
 
-var htmlReturn = (obj, arrayElements, timer, ltpPercentage) => {
+var htmlReturn = (identifier, obj, arrayElements, timer, ltpPercentage) => {
     //let ltpList = obj.split(',')
     let html = '';
     $.each(arrayElements, function (index, arrayElement) {
-        console.log(obj.name, ltpPercentage)
-        html += `${ltpPercentage && ltpPercentage[index] ? ltpPercentage[index].toFixed(2) + ' - ' : ''} ${arrayElement} - ${timer[index]} <br/>`;
+        console.log(obj.name, (obj.ltpPercentage && obj.ltpPercentage[index]) ? obj.ltpPercentage[index] : '');
+        if (identifier === 'ltp') {
+             html += `${obj.ltpPercentage[index]} - ${arrayElement} - ${obj.ltpTime[index]} <br/>`;
+        }
+
+         if (identifier === 'open') {
+             html += `${arrayElement} - ${obj.openTime[index]} <br/>`;
+        }
+       
     });
     return html;
 }
