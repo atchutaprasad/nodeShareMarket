@@ -2,6 +2,7 @@ var axios = require('../axiosInterceptor');
 const cronJob = require('node-cron');
 const parameters = require('../parameters.js');
 let { Intraday, LuckyIntraday } = require('../scema/intradayStoke.model');
+let UtilitySchema = require('../scema/utility.model');
 //let intradayController = require('./intraday.controller');
 const { json } = require('body-parser');
 
@@ -175,6 +176,10 @@ const getHistory = async (req, res) => {
     }
 }
 
+// const getHistory = async (req, res) => {
+//     nineSeventeenTask(req, res);
+// }
+
 const getWorkingDay = (dayCount) => {
     let date = new Date();
     // Create a new date object to avoid modifying the original date parameter
@@ -216,61 +221,81 @@ const getWorkingDay = (dayCount) => {
 };
 
 const rotateLuckyLTPRequests = async (config) => {
-    try {
-        const response = await axios(config).catch((error) => {
-            if (error.isAxiosError) {
-                console.error('Axios error occurred in rotateLuckyLTPRequests:', error.response?.data);
-                return;
-            }
-            // Log other errors if needed
-            console.error(error);
-        });
+    await axios(config).then(async (response) => {
+        try {
+            const ltpData = response.data.data.fetched;
+            //console.log('LTP Data:', ltpData.length);
+            //console.log('LTP Data:', ltpData[0]);
+            ltpData.forEach(async (ltpItem) => {
+                let updateObj = {};
 
-        // if (response?.data?.data) {
-        //     // Process each token's LTP data
-        //     for (const [token, ltpData] of Object.entries(response.data.data)) {
-        //         try {
-        //             const luckyRecord = await LuckyIntraday.findOne({ token: token });
+                const stoke = await LuckyIntraday.findOne({ token: ltpItem.symbolToken });
+                //console.log(stoke)
 
-        //             if (luckyRecord && ltpData.ltp) {
-        //                 const currentLTP = ltpData.ltp;
-        //                 const openPrice = luckyRecord.open || ltpData.open;
+                let updateDBRecords = false;
+                let ltpbasePrice = stoke.ltp[0] || 0// ltpItem.open > 0 ? ltpItem.open : (stoke.open && stoke.open.length > 0 ? stoke.open[0] : 0);
+                let ltpPercentage = stoke.ltp[0] ? ((ltpItem.ltp - ltpbasePrice) / ltpbasePrice) * 100 : 0;
 
-        //                 // Calculate percentage increase
-        //                 let percentageIncrease = 0;
-        //                 if (openPrice && openPrice > 0) {
-        //                     percentageIncrease = (((currentLTP - openPrice) / openPrice) * 100).toFixed(2);
-        //                 }
+                let dateString = new Date();
+                //console.log(`${dateString.getHours()}:${dateString.getMinutes()}:${dateString.getSeconds()}`)
+                if (stoke.ltp && stoke.ltp.length < 2) {
+                    updateObj.ltp = ltpItem.ltp;
+                    updateObj.ltpTime = `${dateString.getHours()}:${dateString.getMinutes()}:${dateString.getSeconds()}`; //new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+                    updateObj.ltpPercentage = ltpPercentage.toFixed(2); //ltpItem.ltpPercentage;
+                    updateDBRecords = true;
+                }
+                if (stoke.open && stoke.open.length < 2) {
+                    updateObj.open = ltpItem.open;
+                    updateObj.openTime = `${dateString.getHours()}:${dateString.getMinutes()}:${dateString.getSeconds()}`;
+                    updateDBRecords = true;
+                }
 
-        //                 // Update the record with new LTP and percentage
-        //                 await LuckyIntraday.findOneAndUpdate(
-        //                     { token: token },
-        //                     {
-        //                         $set: { 
-        //                             ltp: currentLTP,
-        //                             ltpPercentage: percentageIncrease,
-        //                             ltpTime: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
-        //                         }
-        //                     },
-        //                     { new: true, runValidators: false }
-        //                 );
 
-        //                 console.log(`Updated LTP for token ${token}: LTP=${currentLTP}, Percentage Change=${percentageIncrease}%`);
-        //             }
-        //         } catch (updateError) {
-        //             console.error(`Error updating LTP for token ${token}:`, updateError.message);
-        //         }
-        //     }
-        // }
+                if (stoke.ltp && stoke.ltp.length > 1 && stoke.ltp.at(-1) !== ltpItem.ltp) {
+                    updateObj.ltp = ltpItem.ltp;
+                    updateObj.ltpTime = `${dateString.getHours()}:${dateString.getMinutes()}:${dateString.getSeconds()}`;
+                    updateObj.ltpPercentage = ltpPercentage.toFixed(2); //ltpItem.ltpPercentage;
+                    updateDBRecords = true;
+                }
+                if (stoke.open && stoke.open.length > 1 && stoke.open.at(-1) !== ltpItem.open) {
+                    updateObj.open = ltpItem.open;
+                    updateObj.openTime = `${dateString.getHours()}:${dateString.getMinutes()}:${dateString.getSeconds()}`;
+                    updateDBRecords = true;
+                }
 
-        console.log('rotateLuckyLTPRequests LTP Response:', response?.data);
-    } catch (error) {
-        console.error('Error in rotateLuckyLTPRequests:', error.message || error);
-    }
+                if (updateDBRecords === true) {
+
+
+                    await LuckyIntraday.findOneAndUpdate(
+                        { token: ltpItem.symbolToken },
+                        {
+                            $push: updateObj
+                        },
+                        { new: true, runValidators: false }
+                    );
+
+
+                }
+
+            });
+        } catch (updateError) {
+            console.error(`Error updating LTP data:`, updateError);
+        }
+        //return response;
+    }).catch((error) => {
+        if (error.isAxiosError) {
+            console.error('Axios error occurred in rotateLuckyLTPRequests:', error);
+            return;
+        }
+        // Log other errors if needed
+        console.error(error);
+    });
 };
 
-var nineSeventeenTask = async (req, res) => {
+const nineSeventeenTask = async (req, res) => {
     try {
+        //await placeLuckyBuyOrder('99926000'); // Lucky Token
+
         await nineSeventeenTaskInterval();
 
         let utilitySchemaIdenity = await UtilitySchema.findOne({ utilitySchemaIdentifier: true });
@@ -283,8 +308,8 @@ var nineSeventeenTask = async (req, res) => {
                 { new: true, runValidators: false }
             );
         } else {
-            const utilitySchema = new UtilitySchema({ utilitySchemaIdentifier: true, ltpStatus: false, luckyLtpStatus: true });
-            await utilitySchema.save();
+            const utilitySchemaDec = new UtilitySchema({ utilitySchemaIdentifier: true, ltpStatus: false, luckyLtpStatus: true });
+            await utilitySchemaDec.save();
         }
 
         intervalLuckyStopper = setInterval(async () => {
@@ -299,6 +324,13 @@ var nineSeventeenTask = async (req, res) => {
             }
         }, 15000);
 
+        setTimeout(async () => { 
+            const luckyIntradayRecords = await LuckyIntraday.find({});
+            luckyIntradayRecords.forEach(async (stoke) => {
+                await placeLuckyBuyOrder(stoke.token); // Lucky Token
+            });
+        },2000);
+
         res.json({ message: "Market is Open now. NineSeventeenTask LTP fetching will start at 9:17 AM IST" });
 
 
@@ -310,7 +342,7 @@ var nineSeventeenTask = async (req, res) => {
     // console.log("9:17 AM Task Started at Lucky controller ", new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
 };
 
-var nineSeventeenTaskInterval = async () => {
+const nineSeventeenTaskInterval = async () => {
     try {
         const luckyIntradayRecords = await LuckyIntraday.find({});
         let tokens = luckyIntradayRecords.map(item => item.token.toString());
@@ -326,6 +358,7 @@ var nineSeventeenTaskInterval = async () => {
         result.forEach(async (item, index) => {
             let data = { "mode": "FULL", "exchangeTokens": { "NSE": item } }
             let config = parameters.intradayQuoatesParams(data);
+            //console.log('Starting rotateLuckyLTPRequests for chunk index:', config);
             setTimeout(async () => { await rotateLuckyLTPRequests(config); }, index * 100);
         });
     } catch (error) {
@@ -359,6 +392,89 @@ const stopFullyAutomateLuckyLTP = async (req, res) => {
     }
 };
 
+const placeLuckyBuyOrder = async (token) => {
+    try {
+        let luckyStokeRecord = await LuckyIntraday.findOne({ token: token });
+        const buyPrice = Number(luckyStokeRecord.ltp?.at(-1)) || 0;
+
+        if (!luckyStokeRecord) {
+            console.log('No lucky stoke record found for token:', luckyStokeRecord.token);
+            return false;
+        }
+
+        if (luckyStokeRecord.orderId) {
+            console.log('Order already placed for token:', luckyStokeRecord.token, ' Order ID:', luckyStokeRecord.orderId);
+            return false;
+        }
+
+        if (buyPrice > 1200) {
+            console.log('Order price token:', luckyStokeRecord.token, ' is more than 1200 INR. Skipping order placement.');
+            return false;
+        }
+
+        // determine quantity if not provided (reuse existing logic)
+        let finalQuantity = 1;
+        if (buyPrice > 0) {
+            finalQuantity = Math.max(1, Math.floor(1200 / buyPrice));
+        }
+
+        /* starts - lines for API success for angleone order */
+        luckyStokeRecord.orderId = String('----------');
+        luckyStokeRecord.buyPrice = String(buyPrice);
+        luckyStokeRecord.buyQuantity = String(finalQuantity);
+        luckyStokeRecord.ltp = [];
+        luckyStokeRecord.ltpPercentage = [];
+        luckyStokeRecord.ltpTime = [];
+        await luckyStokeRecord.save();
+        /* ends - lines for API success for angleone order */
+
+        console.log(`Placing Lucky Buy Order for token: ${luckyStokeRecord.token}, Price: ${buyPrice}, Quantity: ${finalQuantity}`);
+
+        // const orderPayload = {
+        //     variety: 'NORMAL',
+        //     transactiontype: 'BUY',
+        //     tradingsymbol: luckyStokeRecord.symbol,
+        //     symboltoken: token,
+        //     exchange: 'NSE',
+        //     ordertype: 'MARKET',
+        //     producttype: 'INTRADAY',
+        //     duration: 'IOC',
+        //     price: buyPrice,
+        //     quantity: String(finalQuantity),
+        //     disclosedquantity: '0',
+        //     triggerprice: '0',
+        //     offlineOrder: 'false',
+        //     orderNote: 'LuckyBuy'
+        // };
+
+        // const config = parameters.placeLuckyBuyOrder(orderPayload);
+        // await axios(config).then(async (response) => {
+        //     console.log('Lucky Buy Order Response for token', luckyStokeRecord.token, ':', response?.data);
+        //     // response expected to include order id under response.data.data.orderid or similar
+        //     const orderId = response?.data?.data?.orderId || response?.data?.data?.OrderId || response?.data?.data?.orderid || null;
+
+        //     if (orderId) {
+        //         luckyStokeRecord.orderId = String(orderId);
+        //         luckyStokeRecord.buyPrice = String(buyPrice);
+        //         luckyStokeRecord.buyQuantity = String(finalQuantity);
+        //         await luckyStokeRecord.save();
+        //     }
+        // }).catch((error) => {
+        //     if (error.isAxiosError) {
+        //         // Optionally log a minimal message or skip logging
+        //         console.error('Axios error placing lucky buy order:', error.response?.data);
+        //         return; // Do nothing, suppress log
+        //     }
+        //     // Log other errors if needed
+        //     console.error('Error placing lucky buy order:', error);
+        // });
+
+    } catch (error) {
+        console.error('placeLuckyBuyOrder error:', error.message || error);
+    }
+};
+
+
 
 //minute hour day month weekDay //40 8 * * 1-5
 cronJob.schedule('40 8 * * 1-5', () => {
@@ -382,21 +498,87 @@ cronJob.schedule('17 9 * * 1-5', () => {
 
 
 
-cronJob.schedule('15 11 * * 1-5', async () => {
+cronJob.schedule('15 15 * * 1-5', async () => {
     let req = {};
     let res = { status: () => { return { json: () => { } } }, json: () => { } };
     stopFullyAutomateLuckyLTP(req, res);
-    console.log("Cron Job stopped at 11:15AM", new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
+    console.log("Cron Job stopped at 03:15PM", new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
 }, {
     timezone: 'Asia/Kolkata'
 });
 
 
 module.exports = {
-    getHistory
+    getHistory,
+    placeLuckyBuyOrder
 };
 
 
+// const luckyRecord = await LuckyIntraday.findOne({ token: ltpItem.symbolToken });
+
+// if (luckyRecord && ltpItem.ltp) {
+//     const currentLTP = ltpItem.ltp;
+//     const openPrice = luckyRecord.open || ltpItem.open;
+
+//     // Calculate percentage increase
+//     let percentageIncrease = 0;
+//     if (openPrice && openPrice > 0) {
+//         percentageIncrease = (((currentLTP - openPrice) / openPrice) * 100).toFixed(2);
+//     }
+
+//     // Update the record with new LTP and percentage
+//     await LuckyIntraday.findOneAndUpdate(
+//         { token: ltpItem.symbolToken },
+//         {
+//             $set: {
+//                 ltp: currentLTP,
+//                 ltpPercentage: percentageIncrease,
+//                 ltpTime: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+//             }
+//         },
+//         { new: true, runValidators: false }
+//     );
+
+//     console.log(`Updated LTP for token ${ltpItem.symbolToken}: LTP=${currentLTP}, Percentage Change=${percentageIncrease}%`);
+// }
+
+
+// if (response?.data?.data) {
+//     // Process each token's LTP data
+//     for (const [token, ltpData] of Object.entries(response.data.data)) {
+//         try {
+//             const luckyRecord = await LuckyIntraday.findOne({ token: token });
+
+//             if (luckyRecord && ltpData.ltp) {
+//                 const currentLTP = ltpData.ltp;
+//                 const openPrice = luckyRecord.open || ltpData.open;
+
+//                 // Calculate percentage increase
+//                 let percentageIncrease = 0;
+//                 if (openPrice && openPrice > 0) {
+//                     percentageIncrease = (((currentLTP - openPrice) / openPrice) * 100).toFixed(2);
+//                 }
+
+//                 // Update the record with new LTP and percentage
+//                 await LuckyIntraday.findOneAndUpdate(
+//                     { token: token },
+//                     {
+//                         $set: {
+//                             ltp: currentLTP,
+//                             ltpPercentage: percentageIncrease,
+//                             ltpTime: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+//                         }
+//                     },
+//                     { new: true, runValidators: false }
+//                 );
+
+//                 console.log(`Updated LTP for token ${token}: LTP=${currentLTP}, Percentage Change=${percentageIncrease}%`);
+//             }
+//         } catch (updateError) {
+//             console.error(`Error updating LTP for token ${token}:`, updateError.message);
+//         }
+//     }
+// }
 
 // if (candle && candle.length >= 5) {
 //     const open = candle[1];

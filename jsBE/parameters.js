@@ -78,6 +78,15 @@ var getCandleDataParams = (data) => {
     return config;
 }
 
+var placeLuckyBuyOrder = (data) => {
+    var config = {
+        method: 'post',
+        url: 'https://apiconnect.angelone.in/rest/secure/angelbroking/order/v1/placeOrder',
+        data: JSON.stringify(data)
+    };
+    return config;
+}
+
 var logOutParams = () => {
     var data = { clientcode: "V112910" }
     var config = {
@@ -90,7 +99,7 @@ var logOutParams = () => {
 
 
 
-module.exports = { loginParams, generateToken, profileDetailsParams, rmsDetailsParams, loadRawStokesParams, intradayStokesParams, intradayQuoatesParams, logOutParams, getCandleDataParams };
+module.exports = { loginParams, generateToken, profileDetailsParams, rmsDetailsParams, loadRawStokesParams, intradayStokesParams, intradayQuoatesParams, logOutParams, getCandleDataParams, placeLuckyBuyOrder };
 
 /*
 

@@ -56,23 +56,86 @@ var fullyAutomateSelectedStokesCallback = (res) => {
     if (res && res.length) {
         constants.selectedStokesList = res;
         var html = '';
+        var totalInvested = 0;
+        var currentValue = 0;
         $.each(res, function (index, obj) {
             html += `<tr><td>${index}</td>
-                    <td>${obj.name}</td>
-                    <td>${htmlReturn('open', obj, obj.open)}</td>
-                    <td><div>${htmlReturn('ltp', obj, obj.ltp)}</div></td>
-                    <td>${obj.history[0] ? obj.history[0] : ''}</td>
-                    <td>${obj.history[1] ? obj.history[1] : ''}</td>
-                    <td>${obj.percentChange ? obj.percentChange + '%' : ''}</td>
+                    <td width="160px">${htmlReturn('open', obj, obj.open)}</td>
+                    <td width="650px"><div><canvas id="${'test' + index}"></canvas></div></td>
+                    <td width="140px">${obj.history[0] ? obj.history[0] : ''}</td>
+                    <td>Percentage: ${obj.percentChange ? obj.percentChange + '%' : ''}<br/>
+                        Volume: ${obj.history[1] ? obj.history[1] : ''}<br/>
+                        Buy Price: ${obj.buyPrice ? obj.buyPrice : ''} <br/>
+                        Buy Quantity: ${obj.buyQuantity ? obj.buyQuantity : ''} <br/>
+                        Order ID: ${obj.orderId ? obj.orderId : ''}<br/>
+                        Total Invested : ${obj.buyPrice && obj.buyQuantity ? (parseFloat(obj.buyPrice) * parseInt(obj.buyQuantity)).toFixed(2) : ''}<br/>
+                        Last Traded Price : ${obj.ltp[obj.ltp.length - 1] ? obj.ltp[obj.ltp.length - 1] : ''}<br/>
+                        Current Price : ${obj.ltp[obj.ltp.length - 1] && obj.buyQuantity ? (parseFloat(obj.ltp[obj.ltp.length - 1]) * parseInt(obj.buyQuantity)).toFixed(2) : ''}
+                            <br/></td>
                     </tr>`;
+            totalInvested += obj.buyPrice && obj.buyQuantity ? (parseFloat(obj.buyPrice) * parseInt(obj.buyQuantity)) : 0;
+            currentValue += obj.ltp[obj.ltp.length - 1] && obj.buyQuantity ? (parseFloat(obj.ltp[obj.ltp.length - 1]) * parseInt(obj.buyQuantity)) : 0;
+
+             document.getElementById("totalInvested").innerHTML = totalInvested.toFixed(2);
+             document.getElementById("currentValue").innerHTML = currentValue.toFixed(2);
+                     
+            setTimeout(() => {
+                var ctx = document.getElementById('test' + index).getContext('2d');
+                var chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: obj.ltpTime,
+                        datasets: [{
+                            label: obj.name,
+                            backgroundColor: 'rgb(255, 99, 132)',
+                            borderColor: 'rgb(255, 99, 132)',
+                            data: obj.ltpPercentage,
+                            fill: true,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        title: {
+                            display: true,
+                            text: 'LTP over Time'
+                        },
+                        tooltips: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                        hover: {
+                            mode: 'nearest',
+                            intersect: true
+                        },
+                        scales: {
+                            x: {
+                                display: true,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'Time'
+                                }
+                            },
+                            y: {
+                                display: true,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'LTP Percentage'
+                                }
+                            }
+                        }
+                    },
+                });
+            }, 500);
         });
         html += '';
         document.getElementById("fullyAutoMateSelectedStokes").innerHTML = html;
         document.getElementById("stokeSelectedCount").innerHTML = constants.selectedStokesList.length;
+
     } else {
         alert('zero selected stokes found');
     }
 }
+//${htmlReturn('ltp', obj, obj.ltp)}
 var fullyAutomateLoginCallback = (res) => {
     if (res && res.length) {
         constants.stokesList = res;
@@ -83,9 +146,9 @@ var fullyAutomateLoginCallback = (res) => {
         let response = res;
         // var percentChange = response.map(item => item.open).join(',').split(',').map(Number)
         // var percentChangeResult = percentChange.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
-       // var x = 0;
+        // var x = 0;
         $.each(res, function (index, obj) {
-         //   x += parseFloat(obj.percentChange);
+            //   x += parseFloat(obj.percentChange);
             html += `<tr><td>${index}</td>
                     <td>${obj.name}</td>
                     <td>${htmlReturn('open', obj, obj.open)}</td>
@@ -114,13 +177,13 @@ var htmlReturn = (identifier, obj, arrayElements, timer, ltpPercentage) => {
     $.each(arrayElements, function (index, arrayElement) {
         console.log(obj.name, (obj.ltpPercentage && obj.ltpPercentage[index]) ? obj.ltpPercentage[index] : '');
         if (identifier === 'ltp') {
-             html += `${obj.ltpPercentage[index]} - ${arrayElement} - ${obj.ltpTime[index]} <br/>`;
+            html += `${obj.ltpPercentage[index]} - ${arrayElement} - ${obj.ltpTime[index]} <br/>`;
         }
 
-         if (identifier === 'open') {
-             html += `${arrayElement} - ${obj.openTime[index]} <br/>`;
+        if (identifier === 'open') {
+            html += `${arrayElement} - ${obj.openTime[index]} <br/>`;
         }
-       
+
     });
     return html;
 }

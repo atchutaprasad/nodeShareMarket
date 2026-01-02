@@ -41,22 +41,13 @@ const IntradaySchema = new mongoose.Schema(
         open: {
            type: Array
         },
-        high: {
-            type: String
-        },
-        low: {
-            type: String
-        },
-        close: {
-            type: String
-        },
         percentChange: {
             type: String
         },
         buyPrice: {
             type: String
         },
-        sellPrice: {
+        buyQuantity: {
             type: String
         },
         orderId:{

@@ -8,7 +8,7 @@ let RawStokes = require('../scema/rawStoke.model');
 let { Intraday, LuckyIntraday } = require('../scema/intradayStoke.model');
 //let AutoLogin = require('../scema/loginDetails.model');
 let UtilitySchema = require('../scema/utility.model');
-//let loginLogoutController = require('./loginLogout.controller');
+let luckyController = require('./lucky.controller');
 //const WSOrderUpdates = require('smartapi-javascript/src/websocket-order-updates');
 let intervalStopper;
 
@@ -207,63 +207,60 @@ const rotateLTPRequests = async (config) => {
                         },
                         { new: true, runValidators: false }
                     );
-                    const LuckyIntradayStoke = await LuckyIntraday.findOne({ token: ltpItem.symbolToken });
-                    if (LuckyIntradayStoke) {
-                        await LuckyIntraday.findOneAndUpdate(
-                            { token: ltpItem.symbolToken },
-                            {
-                                $set: { percentChange: ltpItem.percentChange }, $push: updateObj
-                            },
-                            { new: true, runValidators: false }
-                        );
-                    } else if ((ltpPercentage >= 2 || ltpPercentage <= -2) && (ltpItem.open > 0 && ltpItem.ltp > 0)) { // adding new stoke if percent change is more than 2%
-                        console.log('Adding new lucky stoke with percent change of ', ltpPercentage.toFixed(2), '% for token ', ltpItem.symbolToken);
-                        let stokeLTP = stoke.ltp ? [...stoke.ltp] : [];
-                        let stokeOpen = stoke.open ? [...stoke.open] : [];
-                        let stokeLtpTime = stoke.ltpTime ? [...stoke.ltpTime] : [];
-                        let stokeOpenTime = stoke.openTime ? [...stoke.openTime] : [];
-                        let stokeLTPPercentage = stoke.ltpPercentage ? [...stoke.ltpPercentage] : [];
+                    let stokeName = ltpItem.tradingSymbol ? ltpItem.tradingSymbol.toLowerCase() : '';
+                    //console.log('Stoke Name Check:', stokeName);
+                    if (ltpItem.tradingSymbol && stokeName.length > 0 && !stokeName.includes('gold') && !stokeName.includes('silver') && !stokeName.includes('bank') && !stokeName.includes('nifty') && !stokeName.includes('sensex') && !stokeName.includes('mini') && !stokeName.includes('etf') && !stokeName.includes('index') && !stokeName.includes('ultra') && !stokeName.includes('bees') && !stokeName.includes('silv') && ltpItem.ltp < 1200) {
+                        //console.log('Processing Lucky Intraday Stoke for ', ltpItem.symbolToken);
+                        const LuckyIntradayStoke = await LuckyIntraday.findOne({ token: ltpItem.symbolToken });
+                        if (LuckyIntradayStoke) {
+                            await LuckyIntraday.findOneAndUpdate(
+                                { token: ltpItem.symbolToken },
+                                {
+                                    $set: { percentChange: ltpItem.percentChange }, $push: updateObj
+                                },
+                                { new: true, runValidators: false }
+                            );
+                        } else if ((ltpPercentage >= 2 || ltpPercentage <= -2) && (ltpItem.open > 0 && ltpItem.ltp > 0)) { // adding new stoke if percent change is more than 2%
+                            //console.log('Adding new lucky stoke with percent change of ', ltpPercentage.toFixed(2), '% for token ', ltpItem.symbolToken);
+                            let stokeLTP = stoke.ltp ? [...stoke.ltp] : [];
+                            let stokeOpen = stoke.open ? [...stoke.open] : [];
+                            let stokeLtpTime = stoke.ltpTime ? [...stoke.ltpTime] : [];
+                            let stokeOpenTime = stoke.openTime ? [...stoke.openTime] : [];
+                            let stokeLTPPercentage = stoke.ltpPercentage ? [...stoke.ltpPercentage] : [];
 
-                        if (updateObj.ltpPercentage) {
-                            stokeLTPPercentage.push(updateObj.ltpPercentage);
+                            if (updateObj.ltpPercentage) { stokeLTPPercentage.push(updateObj.ltpPercentage); }
+                            if (updateObj.ltp) { stokeLTP.push(updateObj.ltp); }
+                            if (updateObj.open) { stokeOpen.push(updateObj.open);  }
+                            if (updateObj.ltpTime) { stokeLtpTime.push(updateObj.ltpTime);  }
+                            if (updateObj.openTime) { stokeOpenTime.push(updateObj.openTime); }
+
+                            //console.log('stoke ', stokeLTP, stokeLTPPercentage, stokeOpen, stokeLtpTime, stokeOpenTime);
+                            // delete stoke._id;
+                            const newLuckyIntradayStoke = new LuckyIntraday({
+                                //...stoke,
+                                ltp: stokeLTP,
+                                ltpTime: stokeLtpTime,
+                                openTime: stokeOpenTime,
+                                open: stokeOpen,
+                                ltpPercentage: stokeLTPPercentage,
+                                Exchange: stoke.Exchange,
+                                name: stoke.name,
+                                Multiplier: stoke.Multiplier,
+                                token: stoke.token,
+                                symbol: stoke.symbol,
+                                volume: stoke.volume,
+                                high: stoke.high,
+                                low: stoke.low,
+                                close: stoke.close,
+                                percentChange: stoke.percentChange,
+                                buyPrice: stoke.buyPrice,
+                                sellPrice: stoke.sellPrice,
+                                orderId: stoke.orderId,
+                                history: stoke.history,
+                            });
+                            await newLuckyIntradayStoke.save();
+                            luckyController.placeLuckyBuyOrder(stoke.token);
                         }
-                        if (updateObj.ltp) {
-                            stokeLTP.push(updateObj.ltp);
-                        }
-                        if (updateObj.open) {
-                            stokeOpen.push(updateObj.open);
-                        }
-                        if (updateObj.ltpTime) {
-                            stokeLtpTime.push(updateObj.ltpTime);
-                        }
-                        if (updateObj.openTime) {
-                            stokeOpenTime.push(updateObj.openTime);
-                        }
-                        //console.log('stoke ', stokeLTP, stokeLTPPercentage, stokeOpen, stokeLtpTime, stokeOpenTime);
-                        // delete stoke._id;
-                        const newLuckyIntradayStoke = new LuckyIntraday({
-                            //...stoke,
-                            ltp: stokeLTP,
-                            ltpTime: stokeLtpTime,
-                            openTime: stokeOpenTime,
-                            open: stokeOpen,
-                            ltpPercentage: stokeLTPPercentage,
-                            Exchange: stoke.Exchange,
-                            name: stoke.name,
-                            Multiplier: stoke.Multiplier,
-                            token: stoke.token,
-                            symbol: stoke.symbol,
-                            volume: stoke.volume,
-                            high: stoke.high,
-                            low: stoke.low,
-                            close: stoke.close,
-                            percentChange: stoke.percentChange,
-                            buyPrice: stoke.buyPrice,
-                            sellPrice: stoke.sellPrice,
-                            orderId: stoke.orderId,
-                            history: stoke.history,
-                        });
-                        await newLuckyIntradayStoke.save();
                     }
 
                 }
@@ -337,7 +334,7 @@ const fullyAutomateLTP = async (req, res) => {
                 { new: true, runValidators: false }
             );
         } else {
-            const utilitySchema = new UtilitySchema({ utilitySchemaIdentifier: true, ltpStatus: true, luckyLtpStatus: false });
+            const utilitySchema = new UtilitySchema({ utilitySchemaIdentifier: true, ltpStatus: true, luckyLtpStatus: true });
             await utilitySchema.save();
         }
 
